@@ -1,0 +1,11 @@
+<%- include('../../partials/head') %>
+<body class="d-flex align-items-center justify-content-center min-vh-100 p-3">
+  <main class="ft-card text-center" style="max-width: 460px;">
+    <a href="/" class="ft-marca mb-3"><span class="logo" aria-hidden="true">F</span>FitTrack</a>
+    <p class="display-6 fw-bold mb-1" style="color: var(--ft-verde-escuro);"><%= status %></p>
+    <h1 class="h4"><%= titulo %></h1>
+    <p class="text-muted"><%= mensagem %></p>
+    <a href="<%= locals.usuario ? '/painel' : '/' %>" class="btn btn-primary"><%= locals.usuario ? 'Voltar ao painel' : 'Ir para o início' %></a>
+  </main>
+</body>
+</html>

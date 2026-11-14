@@ -1,0 +1,5 @@
+<% (flash || []).forEach(function (m) { %>
+  <div class="ft-aviso <%= m.tipo === 'erro' ? 'erro' : 'sucesso' %> mb-3" role="<%= m.tipo === 'erro' ? 'alert' : 'status' %>">
+    <i class="bi <%= m.tipo === 'erro' ? 'bi-exclamation-circle' : 'bi-check-circle' %> me-1" aria-hidden="true"></i><%= m.msg %>
+  </div>
+<% }) %>

@@ -1,0 +1,85 @@
+<%- include('../../partials/publico-topo') %>
+<% if (contaExcluida) { %>
+  <div class="container pt-3"><div class="ft-aviso sucesso" role="status">Sua conta e todos os seus dados foram excluídos. Obrigado por ter usado o FitTrack.</div></div>
+<% } %>
+<section class="ft-hero py-5">
+  <div class="container py-md-4">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6">
+        <span class="ft-selo verde mb-3">Saúde e bem-estar</span>
+        <h1 class="mb-3">Seu progresso,<br>em cada treino.</h1>
+        <p class="lead mb-4">Registre treinos, defina metas e veja sua evolução semana a semana — sozinho ou com o acompanhamento do seu personal trainer.</p>
+        <div class="d-flex flex-wrap gap-2">
+          <a href="/cadastro" class="btn btn-primary btn-lg">Criar conta gratuita</a>
+          <a href="/entrar" class="btn btn-outline-secondary btn-lg">Entrar</a>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="ft-card shadow-sm">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <strong>Esta semana</strong><span class="ft-selo verde">Meta OMS: 150 min</span>
+          </div>
+          <div class="row g-3 mb-3">
+            <div class="col-6"><div class="ft-kpi"><div class="rotulo">Minutos ativos</div><div class="valor">185 <small>/ 150</small></div></div>
+              <div class="ft-barra mt-2"><span style="width: 100%"></span></div></div>
+            <div class="col-6"><div class="ft-kpi"><div class="rotulo">Treinos</div><div class="valor">4</div><div class="nota ft-sobe">▲ 1 a mais que a anterior</div></div></div>
+          </div>
+          <div class="d-flex justify-content-between small fw-semibold"><span>Correr 5 km sem parar</span><span>72%</span></div>
+          <div class="ft-barra mt-1 mb-2"><span style="width: 72%"></span></div>
+          <div class="d-flex justify-content-between small fw-semibold"><span>Chegar a 62 kg</span><span>45%</span></div>
+          <div class="ft-barra mt-1"><span style="width: 45%"></span></div>
+          <p class="small text-muted mt-3 mb-0">Exemplo ilustrativo do painel.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5">
+  <div class="container">
+    <h2 class="h3 text-center mb-2">Funcionalidades</h2>
+    <p class="text-center text-muted mb-4">Tudo o que você precisa para manter a constância.</p>
+    <div class="row g-3">
+      <% [
+        ['bi-lightning-charge', 'Histórico de treinos', 'Modalidade, duração, intensidade e cada exercício com séries, repetições, carga, distância e tempo.'],
+        ['bi-bullseye', 'Metas com prazo', 'Defina objetivos mensuráveis e acompanhe o percentual concluído automaticamente.'],
+        ['bi-rulers', 'Medidas corporais', 'Peso, percentual de gordura e cintura, com cálculo do IMC e gráfico de evolução.'],
+        ['bi-bar-chart', 'Painel semanal', 'Minutos ativos comparados à recomendação da OMS de 150 minutos por semana.'],
+      ].forEach(function (c) { %>
+        <div class="col-sm-6 col-lg-3"><div class="ft-card ft-perfil-card">
+          <div class="icone" style="background: var(--ft-primaria-clara); color: var(--ft-verde-escuro);"><i class="bi <%= c[0] %>" aria-hidden="true"></i></div>
+          <h3 class="h6"><%= c[1] %></h3><p class="small text-muted mb-0"><%= c[2] %></p>
+        </div></div>
+      <% }) %>
+    </div>
+  </div>
+</section>
+
+<section class="pb-5">
+  <div class="container">
+    <h2 class="h3 text-center mb-4">Para cada perfil</h2>
+    <div class="row g-3">
+      <div class="col-md-4"><div class="ft-card ft-perfil-card">
+        <div class="icone" style="background: var(--ft-primaria-clara); color: var(--ft-verde-escuro);"><i class="bi bi-person" aria-hidden="true"></i></div>
+        <h3 class="h6">Usuário pessoal</h3>
+        <ul class="ft-check small mb-0"><li>Registra os próprios treinos, metas e medidas</li><li>Acompanha o progresso em gráficos</li><li>Cria a conta gratuitamente</li></ul>
+      </div></div>
+      <div class="col-md-4"><div class="ft-card ft-perfil-card">
+        <div class="icone" style="background: var(--ft-admin); color: var(--ft-admin-texto);"><i class="bi bi-people" aria-hidden="true"></i></div>
+        <h3 class="h6">Administrador (personal trainer)</h3>
+        <ul class="ft-check small mb-0"><li>Tudo do usuário pessoal</li><li>Cadastra alunos e atribui treinos e metas</li><li>Acompanha a aderência de cada aluno</li></ul>
+      </div></div>
+      <div class="col-md-4"><div class="ft-card ft-perfil-card">
+        <div class="icone" style="background: var(--ft-info); color: var(--ft-info-texto);"><i class="bi bi-eye" aria-hidden="true"></i></div>
+        <h3 class="h6">Usuário vinculado (aluno)</h3>
+        <ul class="ft-check small mb-0"><li>Recebe o acesso do seu administrador</li><li>Consulta treinos e metas atribuídos</li><li>Vê o progresso atualizado pelo treinador</li></ul>
+      </div></div>
+    </div>
+    <div class="ft-aviso pessego mt-4" role="note">
+      <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
+      <strong>Aviso:</strong> o FitTrack é uma ferramenta de registro e acompanhamento. Ele não substitui a orientação de médicos, nutricionistas ou profissionais de educação física.
+      Seus dados de saúde são tratados conforme a <a href="/privacidade">política de privacidade</a>.
+    </div>
+  </div>
+</section>
+<%- include('../../partials/publico-rodape') %>

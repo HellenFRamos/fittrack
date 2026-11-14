@@ -1,0 +1,79 @@
+<%- include('../../partials/app-topo') %>
+<div class="ft-cabecalho">
+  <div>
+    <h1>Usuários vinculados</h1>
+    <div class="sub"><%= totalAtivos %> aluno<%= totalAtivos === 1 ? '' : 's' %> ativo<%= totalAtivos === 1 ? '' : 's' %><%= aderencia !== null ? ` · aderência média ${aderencia}%` : '' %></div>
+  </div>
+  <a href="/admin/vinculados/novo" class="btn btn-admin"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Cadastrar vinculado</a>
+</div>
+
+<section class="ft-card">
+  <form class="row g-2 mb-3" method="get" action="/admin/vinculados" role="search">
+    <div class="col-md-8">
+      <label class="visually-hidden" for="busca">Buscar por nome ou e-mail</label>
+      <div class="input-group"><span class="input-group-text bg-white" aria-hidden="true"><i class="bi bi-search"></i></span>
+        <input class="form-control" id="busca" name="busca" value="<%= busca %>" placeholder="Buscar por nome ou e-mail"></div>
+    </div>
+    <div class="col-7 col-md-2">
+      <label class="visually-hidden" for="situacao">Situação</label>
+      <select class="form-select" id="situacao" name="situacao" data-autoenviar>
+        <option value="ativos" <%= situacao === 'ativos' ? 'selected' : '' %>>Situação: Ativos</option>
+        <option value="inativos" <%= situacao === 'inativos' ? 'selected' : '' %>>Situação: Inativos</option>
+        <option value="todos" <%= situacao === 'todos' ? 'selected' : '' %>>Situação: Todos</option>
+      </select>
+    </div>
+    <div class="col-5 col-md-2"><button class="btn btn-outline-secondary w-100" type="submit">Buscar</button></div>
+  </form>
+
+  <% if (!vinculados.length) { %>
+    <div class="ft-vazio"><i class="bi bi-people" aria-hidden="true"></i><%= busca || situacao !== 'ativos' ? 'Nenhum vinculado encontrado.' : 'Você ainda não cadastrou nenhum aluno.' %>
+      <% if (!busca && situacao === 'ativos') { %><div class="mt-2"><a class="btn btn-admin btn-sm" href="/admin/vinculados/novo">Cadastrar o primeiro</a></div><% } %></div>
+  <% } else { %>
+    <div class="table-responsive">
+      <table class="table">
+        <thead><tr><th scope="col">Nome</th><th scope="col">Treinos na semana</th><th scope="col" class="d-none d-md-table-cell">Metas ativas</th><th scope="col" class="d-none d-md-table-cell">Último treino</th><th scope="col">Situação</th><th scope="col">Ações</th></tr></thead>
+        <tbody>
+          <% vinculados.forEach(function (v) {
+               const semTreinar = v.ativo && (!v.ultimo_treino || d.diffDias(v.ultimo_treino, d.hojeISO()) > 7);
+               const pct = v.treinos_semana ? Math.round(v.realizados_semana / v.treinos_semana * 100) : 0; %>
+            <tr>
+              <td><a class="fw-semibold" href="/admin/vinculados/<%= v.id_usuario %>"><%= v.nome %></a><div class="small text-muted"><%= v.email %></div></td>
+              <td style="min-width: 110px;">
+                <% if (!v.ativo) { %>—<% } else { %>
+                  <span class="num small"><%= v.realizados_semana %> de <%= v.treinos_semana %></span>
+                  <div class="ft-barra mt-1 <%= pct < 50 ? 'alerta' : '' %>" role="progressbar" aria-valuenow="<%= pct %>" aria-valuemin="0" aria-valuemax="100" aria-label="Aderência de <%= v.nome %>"><span style="width: <%= pct %>%"></span></div>
+                <% } %>
+              </td>
+              <td class="d-none d-md-table-cell num"><%= v.metas_ativas %></td>
+              <td class="d-none d-md-table-cell"><%= v.ativo ? d.relativo(v.ultimo_treino) : '—' %></td>
+              <td>
+                <% if (!v.ativo) { %><span class="ft-selo cinza">Inativo</span>
+                <% } else if (v.senha_provisoria) { %><span class="ft-selo azul">Aguardando 1º acesso</span>
+                <% } else if (semTreinar) { %><span class="ft-selo pessego">Sem treinar</span>
+                <% } else { %><span class="ft-selo verde">Ativo</span><% } %>
+              </td>
+              <td class="text-nowrap">
+                <% if (v.ativo) { %>
+                  <a class="ft-selo lavanda text-decoration-none" href="/admin/vinculados/<%= v.id_usuario %>">Ver ficha</a>
+                  <div class="dropdown d-inline-block">
+                    <button class="ft-selo lavanda border-0 dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Atribuir</button>
+                    <ul class="dropdown-menu">
+                      <li><a class="dropdown-item" href="/admin/vinculados/<%= v.id_usuario %>/treinos/novo"><i class="bi bi-lightning-charge me-1" aria-hidden="true"></i>Treino</a></li>
+                      <li><a class="dropdown-item" href="/admin/vinculados/<%= v.id_usuario %>/metas/nova"><i class="bi bi-bullseye me-1" aria-hidden="true"></i>Meta</a></li>
+                      <li><a class="dropdown-item" href="/admin/vinculados/<%= v.id_usuario %>/medidas"><i class="bi bi-rulers me-1" aria-hidden="true"></i>Medição</a></li>
+                    </ul>
+                  </div>
+                <% } else { %>
+                  <form method="post" action="/admin/vinculados/<%= v.id_usuario %>/reativar" class="d-inline"><input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button class="ft-selo lavanda border-0" type="submit">Reativar</button></form>
+                  <a class="ft-selo cinza text-decoration-none" href="/admin/vinculados/<%= v.id_usuario %>">Histórico</a>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</section>
+<%- include('../../partials/app-rodape') %>

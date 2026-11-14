@@ -1,0 +1,145 @@
+<%- include('../../partials/app-topo') %>
+<%
+  const base = `${ctx.prefixo}/treinos`;
+  const t = treino;
+  const editando = !!t.id_treino;
+  const linhas = itens.length ? itens : [{}];
+  const listaEx = exercicios.map((e) => ({ id: e.id_exercicio, m: e.id_modalidade, n: e.nome, mod: e.modalidade }));
+  const errItens = erros.itensLinha || {};
+  const tempoMin = (it) => it.tempo_min != null ? it.tempo_min : (it.tempo_seg ? Math.round(it.tempo_seg / 6) / 10 : '');
+  const v = (x) => (x === null || x === undefined || Number.isNaN(x)) ? '' : x;
+%>
+<form method="post" action="<%= acao %>" novalidate id="formTreino" data-peso="<%= pesoReferencia || '' %>" data-exercicios="<%= JSON.stringify(listaEx) %>">
+<input type="hidden" name="_csrf" value="<%= csrfToken %>">
+<div class="ft-cabecalho">
+  <div>
+    <h1><%= titulo %></h1>
+    <div class="ft-migalhas">
+      <% if (ctx.tipo === 'vinculado') { %><a href="/admin/vinculados">Usuários vinculados</a> › <a href="<%= ctx.prefixo %>"><%= ctx.dono.nome %></a> › <a href="<%= base %>">Treinos</a><% } else { %><a href="<%= base %>">Meus treinos</a><% } %>
+      › <%= editando ? 'Editar' : 'Novo' %>
+    </div>
+  </div>
+  <div class="d-none d-lg-flex gap-2">
+    <a class="btn btn-outline-secondary" href="<%= editando ? `${base}/${t.id_treino}` : (ctx.tipo === 'vinculado' ? ctx.prefixo : base) %>">Cancelar</a>
+    <button class="btn <%= ctx.tipo === 'vinculado' ? 'btn-admin' : 'btn-primary' %>" type="submit">Salvar treino</button>
+  </div>
+</div>
+
+<% if (ctx.tipo === 'vinculado') { %>
+  <div class="ft-aviso admin mb-3"><i class="bi bi-person-badge me-1" aria-hidden="true"></i>Este treino será <%= editando ? 'atualizado' : 'atribuído' %> para <strong><%= ctx.dono.nome %></strong> e aparecerá no painel dele(a) como “atribuído por você”.</div>
+<% } %>
+<% if (copiadoDe) { %>
+  <div class="ft-aviso sucesso mb-3"><i class="bi bi-copy me-1" aria-hidden="true"></i>Cópia de “<%= copiadoDe.titulo %>” (<%= d.br(copiadoDe.data_treino) %>). Ajuste o que precisar e salve.</div>
+<% } %>
+<% if (Object.keys(erros).length) { %>
+  <div class="ft-aviso erro mb-3" role="alert"><i class="bi bi-exclamation-circle me-1" aria-hidden="true"></i>O treino não foi salvo. Corrija os campos destacados.</div>
+<% } %>
+
+<% if (!editando && modelos.length) { %>
+  <section class="ft-card mb-3" aria-labelledby="tCopiar">
+    <h2 id="tCopiar" class="mb-2">Copiar um treino existente <span class="small text-muted fw-normal">(opcional)</span></h2>
+    <div class="d-flex flex-column flex-sm-row gap-2" data-copiar="<%= base %>/novo?copiar=">
+      <label class="visually-hidden" for="copiarDe">Treino a copiar</label>
+      <select class="form-select" id="copiarDe">
+        <option value="">Selecione um treino seu ou de um aluno…</option>
+        <% modelos.forEach(function (m) { %><option value="<%= m.id_treino %>"><%= m.titulo %> · <%= m.modalidade %> · <%= d.brCurta(m.data_treino) %><%= m.id_usuario !== usuario.id_usuario ? ` · ${m.dono}` : '' %></option><% }) %>
+      </select>
+      <button class="btn btn-outline-secondary text-nowrap" type="button" data-acao="copiar">Copiar</button>
+    </div>
+  </section>
+<% } %>
+
+<section class="ft-card mb-3" aria-labelledby="tGerais">
+  <h2 id="tGerais" class="visually-hidden">Dados gerais</h2>
+  <div class="row g-3">
+    <div class="col-md-8">
+      <label class="form-label obrig" for="titulo">Título</label>
+      <input class="form-control <%= erros.titulo ? 'is-invalid' : '' %>" id="titulo" name="titulo" value="<%= t.titulo %>" maxlength="100" placeholder="Ex.: Treino A – Membros inferiores" required>
+      <%- include('../../partials/erro-campo', { campo: 'titulo' }) %>
+    </div>
+    <div class="col-6 col-md-4">
+      <label class="form-label obrig" for="data_treino">Data</label>
+      <input class="form-control <%= erros.data_treino ? 'is-invalid' : '' %>" type="date" id="data_treino" name="data_treino" value="<%= t.data_treino %>" required data-hoje="<%= d.hojeISO() %>">
+      <%- include('../../partials/erro-campo', { campo: 'data_treino' }) %>
+    </div>
+    <div class="col-6 col-md-4">
+      <label class="form-label obrig" for="id_modalidade">Modalidade</label>
+      <select class="form-select <%= erros.id_modalidade ? 'is-invalid' : '' %>" id="id_modalidade" name="id_modalidade" required>
+        <option value="">Selecione</option>
+        <% modalidades.forEach(function (m) { %><option value="<%= m.id_modalidade %>" data-met="<%= m.met %>" <%= Number(t.id_modalidade) === m.id_modalidade ? 'selected' : '' %>><%= m.nome %></option><% }) %>
+      </select>
+      <%- include('../../partials/erro-campo', { campo: 'id_modalidade' }) %>
+    </div>
+    <div class="col-6 col-md-4">
+      <label class="form-label obrig" for="duracao_min">Duração (min)</label>
+      <input class="form-control <%= erros.duracao_min ? 'is-invalid' : '' %>" type="number" inputmode="numeric" id="duracao_min" name="duracao_min" min="1" max="600" value="<%= v(t.duracao_min) %>" required>
+      <%- include('../../partials/erro-campo', { campo: 'duracao_min' }) %>
+    </div>
+    <div class="col-6 col-md-4">
+      <label class="form-label obrig" for="intensidade">Intensidade</label>
+      <select class="form-select <%= erros.intensidade ? 'is-invalid' : '' %>" id="intensidade" name="intensidade">
+        <% Object.entries(f.ROTULOS.intensidade).forEach(function ([k, r]) { %><option value="<%= k %>" <%= t.intensidade === k ? 'selected' : '' %>><%= r %></option><% }) %>
+      </select>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="observacoes">Observações</label>
+      <input class="form-control" id="observacoes" name="observacoes" value="<%= t.observacoes || '' %>" maxlength="2000" placeholder="Como se sentiu, dores, ajustes…">
+    </div>
+    <div class="col-6 col-md-3">
+      <label class="form-label" for="status">Situação</label>
+      <select class="form-select" id="status" name="status" aria-describedby="ajudaStatus">
+        <option value="REALIZADO" <%= t.status === 'REALIZADO' ? 'selected' : '' %>>Realizado</option>
+        <option value="PLANEJADO" <%= t.status === 'PLANEJADO' ? 'selected' : '' %>>Planejado</option>
+      </select>
+    </div>
+    <div class="col-6 col-md-3">
+      <label class="form-label" for="calorias">Calorias estimadas</label>
+      <input class="form-control ft-auto" id="calorias" readonly tabindex="-1" value="<%= t.calorias_estimadas ? `≈ ${t.calorias_estimadas} kcal` : '' %>" aria-describedby="ajudaCal">
+    </div>
+    <div class="col-12 mt-1">
+      <div id="ajudaStatus" class="form-text">Treinos com data futura ficam como planejados e só entram nos indicadores quando realizados.</div>
+      <div id="ajudaCal" class="form-text"><%= pesoReferencia ? `Calorias = MET da modalidade × ${f.num(pesoReferencia)} kg (último peso) × duração.` : 'Sem peso registrado: registre uma medida corporal para estimar as calorias.' %></div>
+    </div>
+  </div>
+</section>
+
+<section class="ft-card mb-3" aria-labelledby="tExercicios">
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <h2 id="tExercicios" class="mb-0">Exercícios</h2>
+    <button class="btn btn-outline-secondary btn-sm" type="button" data-acao="add-item"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Adicionar exercício</button>
+  </div>
+  <% if (erros.itens) { %><div class="ft-aviso erro mb-2" role="alert"><%= erros.itens %></div><% } %>
+  <div class="ft-itens-cab" aria-hidden="true"><span>#</span><span>Exercício</span><span>Séries</span><span>Repetições</span><span>Carga (kg)</span><span>Distância (km)</span><span>Tempo (min)</span><span></span></div>
+  <div id="listaItens">
+    <% linhas.forEach(function (it, i) { %>
+      <div class="ft-item-linha" data-item>
+        <span class="c-num" data-num><%= i + 1 %></span>
+        <div class="c-ex">
+          <label class="mob" for="ex<%= i %>">Exercício <span data-num><%= i + 1 %></span></label>
+          <select class="form-select <%= errItens[i] ? 'is-invalid' : '' %>" id="ex<%= i %>" name="itens[<%= i %>][id_exercicio]" data-campo="id_exercicio" data-valor="<%= it.id_exercicio || '' %>" aria-label="Exercício">
+            <option value="">Selecione o exercício</option>
+            <% exercicios.forEach(function (e) { %><option value="<%= e.id_exercicio %>" <%= Number(it.id_exercicio) === e.id_exercicio ? 'selected' : '' %>><%= e.nome %> (<%= e.modalidade %>)</option><% }) %>
+          </select>
+          <% if (errItens[i]) { %><div class="invalid-feedback d-block"><%= errItens[i] %></div><% } %>
+        </div>
+        <div><label class="mob" for="se<%= i %>">Séries</label><input class="form-control" type="number" min="0" max="50" inputmode="numeric" id="se<%= i %>" name="itens[<%= i %>][series]" data-campo="series" value="<%= v(it.series) %>" aria-label="Séries"></div>
+        <div><label class="mob" for="re<%= i %>">Repetições</label><input class="form-control" type="number" min="0" max="120" inputmode="numeric" id="re<%= i %>" name="itens[<%= i %>][repeticoes]" data-campo="repeticoes" value="<%= v(it.repeticoes) %>" aria-label="Repetições"></div>
+        <div><label class="mob" for="ca<%= i %>">Carga (kg)</label><input class="form-control" type="number" min="0" max="1000" step="0.5" inputmode="decimal" id="ca<%= i %>" name="itens[<%= i %>][carga_kg]" data-campo="carga_kg" value="<%= v(it.carga_kg) %>" aria-label="Carga em quilos"></div>
+        <div><label class="mob" for="di<%= i %>">Distância (km)</label><input class="form-control" type="number" min="0" max="500" step="0.01" inputmode="decimal" id="di<%= i %>" name="itens[<%= i %>][distancia_km]" data-campo="distancia_km" value="<%= v(it.distancia_km) %>" aria-label="Distância em quilômetros"></div>
+        <div><label class="mob" for="te<%= i %>">Tempo (min)</label><input class="form-control" type="number" min="0" max="600" step="0.5" inputmode="decimal" id="te<%= i %>" name="itens[<%= i %>][tempo_min]" data-campo="tempo_min" value="<%= v(tempoMin(it)) %>" aria-label="Tempo em minutos"></div>
+        <div class="c-acao"><button class="btn btn-link text-danger p-1" type="button" data-acao="remover-item" aria-label="Remover exercício"><i class="bi bi-trash" aria-hidden="true"></i></button></div>
+      </div>
+    <% }) %>
+  </div>
+  <p class="form-text mb-0 mt-2">Preencha séries, repetições e carga (força) ou distância e tempo (aeróbicos). Os exercícios da modalidade escolhida aparecem primeiro.</p>
+</section>
+
+<div class="ft-salvar-fixo d-lg-none">
+  <button class="btn <%= ctx.tipo === 'vinculado' ? 'btn-admin' : 'btn-primary' %> w-100 py-2" type="submit">Salvar treino</button>
+</div>
+<div class="d-none d-lg-flex justify-content-end gap-2">
+  <a class="btn btn-outline-secondary" href="<%= editando ? `${base}/${t.id_treino}` : (ctx.tipo === 'vinculado' ? ctx.prefixo : base) %>">Cancelar</a>
+  <button class="btn <%= ctx.tipo === 'vinculado' ? 'btn-admin' : 'btn-primary' %>" type="submit">Salvar treino</button>
+</div>
+</form>
+<%- include('../../partials/app-rodape') %>

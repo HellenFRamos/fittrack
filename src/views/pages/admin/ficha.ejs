@@ -1,0 +1,66 @@
+<%- include('../../partials/app-topo') %>
+<% const pre = `/admin/vinculados/${v.id_usuario}`; %>
+<div class="ft-cabecalho">
+  <div class="d-flex align-items-center gap-3">
+    <span class="ft-avatar" style="width: 48px; height: 48px; font-size: 1.05rem;"><%= f.iniciais(v.nome) %></span>
+    <div>
+      <h1><%= v.nome %></h1>
+      <div class="sub"><%= v.email %><%= d.idade(v.data_nascimento) !== null ? ` · ${d.idade(v.data_nascimento)} anos` : '' %><%= v.altura_cm ? ` · ${v.altura_cm} cm` : '' %> · aluno desde <%= d.br(v.criado_em) %></div>
+      <div class="ft-migalhas"><a href="/admin/vinculados">Usuários vinculados</a> › Ficha</div>
+    </div>
+  </div>
+  <div class="d-flex flex-wrap gap-2">
+    <% if (v.ativo) { %>
+      <a class="btn btn-admin" href="<%= pre %>/treinos/novo"><i class="bi bi-lightning-charge me-1" aria-hidden="true"></i>Atribuir treino</a>
+      <a class="btn btn-admin" href="<%= pre %>/metas/nova"><i class="bi bi-bullseye me-1" aria-hidden="true"></i>Atribuir meta</a>
+    <% } %>
+    <div class="dropdown">
+      <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Mais ações</button>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li><a class="dropdown-item" href="<%= pre %>/editar"><i class="bi bi-pencil me-1" aria-hidden="true"></i>Editar dados</a></li>
+        <li><a class="dropdown-item" href="<%= pre %>/medidas"><i class="bi bi-rulers me-1" aria-hidden="true"></i>Registrar medição</a></li>
+        <li><form method="post" action="<%= pre %>/senha" data-confirmar="Gerar uma nova senha provisória para <%= v.nome %>? A senha atual deixará de funcionar."><input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button class="dropdown-item" type="submit"><i class="bi bi-key me-1" aria-hidden="true"></i>Gerar nova senha provisória</button></form></li>
+        <li><hr class="dropdown-divider"></li>
+        <% if (v.ativo) { %>
+          <li><form method="post" action="<%= pre %>/desativar" data-confirmar="Desativar o acesso de <%= v.nome %>? O histórico será preservado e você poderá reativar depois."><input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="voltar" value="ficha">
+            <button class="dropdown-item text-danger" type="submit"><i class="bi bi-person-x me-1" aria-hidden="true"></i>Desativar acesso</button></form></li>
+        <% } else { %>
+          <li><form method="post" action="<%= pre %>/reativar"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="voltar" value="ficha">
+            <button class="dropdown-item" type="submit"><i class="bi bi-person-check me-1" aria-hidden="true"></i>Reativar acesso</button></form></li>
+        <% } %>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<% if (!v.ativo) { %><div class="ft-aviso pessego mb-3"><i class="bi bi-person-x me-1" aria-hidden="true"></i>Acesso desativado. O aluno não consegue entrar, mas o histórico está preservado.</div><% } %>
+<% if (v.senha_provisoria) { %><div class="ft-aviso info mb-3"><i class="bi bi-hourglass-split me-1" aria-hidden="true"></i>O aluno ainda não fez o primeiro acesso (senha provisória pendente).</div><% } %>
+
+<%- include('../../partials/painel-corpo', { painel, pre, leitura: false }) %>
+
+<div class="row g-3 mt-0">
+  <div class="col-lg-7">
+    <section class="ft-card h-100" aria-labelledby="tTreinosV">
+      <div class="d-flex justify-content-between align-items-center"><h2 id="tTreinosV">Histórico de treinos</h2><a class="small" href="<%= pre %>/treinos">Ver todos (<%= totalTreinos %>)</a></div>
+      <% if (treinos.length) { %>
+        <ul class="ft-lista"><% treinos.forEach(function (t) { %><li><%- include('../../partials/treino-item', { t, link: `${pre}/treinos/${t.id_treino}` }) %></li><% }) %></ul>
+      <% } else { %><div class="ft-vazio py-3">Nenhum treino ainda.</div><% } %>
+    </section>
+  </div>
+  <div class="col-lg-5">
+    <section class="ft-card h-100" aria-labelledby="tMedV">
+      <div class="d-flex justify-content-between align-items-center"><h2 id="tMedV">Medidas recentes</h2><a class="small" href="<%= pre %>/medidas">Gerenciar</a></div>
+      <% if (medidas.length) { %>
+        <ul class="ft-lista"><% medidas.forEach(function (m) { %><li class="d-flex justify-content-between"><span><%= d.br(m.data_medicao) %></span><span class="num fw-semibold"><%= f.num(m.peso_kg) %> kg<%= m.imc ? ` · IMC ${f.num(m.imc)}` : '' %></span></li><% }) %></ul>
+      <% } else { %><div class="ft-vazio py-3">Nenhuma medição registrada.</div><% } %>
+    </section>
+  </div>
+</div>
+<% if (metas.some((m) => m.status !== 'ATIVA')) { %>
+  <section class="ft-card mt-3" aria-labelledby="tMetasHist">
+    <h2 id="tMetasHist">Metas concluídas e canceladas</h2>
+    <ul class="ft-lista"><% metas.filter((m) => m.status !== 'ATIVA').forEach(function (m) { %><li><%- include('../../partials/meta-item', { m, link: `${pre}/metas/${m.id_meta}` }) %></li><% }) %></ul>
+  </section>
+<% } %>
+<%- include('../../partials/app-rodape') %>

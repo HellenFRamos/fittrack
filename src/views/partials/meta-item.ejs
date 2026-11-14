@@ -1,0 +1,21 @@
+<%
+  const reducao = Number(m.valor_alvo) < Number(m.valor_inicial);
+  const un = m.unidade;
+  const classeBarra = m.status === 'CONCLUIDA' ? 'concluida' : ((m.perto_do_prazo || m.vencida) ? 'alerta' : '');
+  const atribuida = Number(m.id_criador) !== Number(m.id_usuario);
+%>
+<a class="ft-item" href="<%= link %>">
+  <div class="d-flex justify-content-between gap-2">
+    <span class="ft-item-titulo"><%= m.titulo %></span>
+    <span class="small fw-semibold num" aria-label="<%= m.percentual %> por cento concluído"><%= m.percentual %>%</span>
+  </div>
+  <div class="ft-barra <%= classeBarra %> my-1" role="progressbar" aria-valuenow="<%= m.percentual %>" aria-valuemin="0" aria-valuemax="100" aria-label="Progresso da meta <%= m.titulo %>"><span style="width: <%= m.percentual %>%"></span></div>
+  <div class="ft-item-sub">
+    <% if (reducao) { %><%= f.num(m.valor_atual, 2) %> <%= un %> (início <%= f.num(m.valor_inicial, 2) %>)<% } else { %><%= f.num(m.valor_atual, 2) %> de <%= f.num(m.valor_alvo, 2) %> <%= un %><% } %>
+    · até <%= d.brCurta(m.data_limite) %>
+    <% if (m.status === 'CONCLUIDA') { %> · <span class="ft-sobe fw-semibold">concluída</span><% } %>
+    <% if (m.status === 'CANCELADA') { %> · cancelada<% } %>
+    <% if (m.vencida) { %> · <span class="ft-alerta fw-semibold">prazo vencido</span><% } else if (m.perto_do_prazo) { %> · <span class="ft-alerta fw-semibold"><%= m.dias_restantes === 0 ? 'vence hoje' : `vence em ${m.dias_restantes} dia${m.dias_restantes > 1 ? 's' : ''}` %></span><% } %>
+    <% if (typeof mostrarCriador !== 'undefined' && mostrarCriador && atribuida) { %> · atribuída por <%= f.nomeCurto(m.criador_nome) %><% } %>
+  </div>
+</a>

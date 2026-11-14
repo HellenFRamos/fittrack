@@ -1,0 +1,33 @@
+<%
+  const u = usuario;
+  const ativo = (p, exato) => (exato ? caminho === p : (caminho === p || caminho.startsWith(p + '/'))) ? 'ativo' : '';
+  const vinc = u.tipo_perfil === 'VINCULADO';
+%>
+<nav aria-label="Menu principal">
+  <ul class="ft-menu">
+    <li><a href="/painel" class="<%= ativo('/painel', true) %>"><i class="bi bi-grid-1x2" aria-hidden="true"></i>Painel</a></li>
+    <% if (vinc) { %>
+      <li><a href="/atribuidos/treinos" class="<%= ativo('/atribuidos/treinos') %>"><i class="bi bi-lightning-charge" aria-hidden="true"></i>Treinos atribuídos</a></li>
+      <li><a href="/atribuidos/metas" class="<%= ativo('/atribuidos/metas') %>"><i class="bi bi-bullseye" aria-hidden="true"></i>Metas atribuídas</a></li>
+      <li><a href="/atribuidos/medidas" class="<%= ativo('/atribuidos/medidas') %>"><i class="bi bi-rulers" aria-hidden="true"></i>Minhas medidas</a></li>
+      <li><a href="/perfil" class="<%= ativo('/perfil') %>"><i class="bi bi-person-circle" aria-hidden="true"></i>Meu perfil</a></li>
+    <% } else { %>
+      <li><a href="/treinos" class="<%= ativo('/treinos') %>"><i class="bi bi-lightning-charge" aria-hidden="true"></i>Meus treinos</a></li>
+      <li><a href="/metas" class="<%= ativo('/metas') %>"><i class="bi bi-bullseye" aria-hidden="true"></i>Minhas metas</a></li>
+      <li><a href="/medidas" class="<%= ativo('/medidas') %>"><i class="bi bi-rulers" aria-hidden="true"></i>Medidas corporais</a></li>
+      <% if (u.tipo_perfil === 'ADMINISTRADOR') { %>
+        <li class="secao">Administração</li>
+        <li><a href="/admin/vinculados" class="admin <%= ativo('/admin/vinculados') %>"><i class="bi bi-people" aria-hidden="true"></i>Usuários vinculados</a></li>
+      <% } %>
+      <li class="secao">Conta</li>
+      <li><a href="/perfil" class="<%= ativo('/perfil') %>"><i class="bi bi-person-circle" aria-hidden="true"></i>Meu perfil</a></li>
+    <% } %>
+    <% if (vinc) { %><li class="secao">Conta</li><% } %>
+    <li>
+      <form method="post" action="/sair">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button type="submit"><i class="bi bi-box-arrow-right" aria-hidden="true"></i>Sair</button>
+      </form>
+    </li>
+  </ul>
+</nav>

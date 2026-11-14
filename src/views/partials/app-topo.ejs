@@ -1,0 +1,36 @@
+<%- include('head') %>
+<body>
+<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>
+<div class="ft-app">
+  <aside class="ft-lateral">
+    <a href="/painel" class="ft-marca mb-3 px-2"><span class="logo" aria-hidden="true">F</span>FitTrack</a>
+    <% if (usuario.tipo_perfil !== 'VINCULADO') { %>
+      <a href="/treinos/novo" class="btn btn-primary w-100 mb-3"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Registrar treino</a>
+    <% } %>
+    <%- include('menu') %>
+    <div class="mt-auto pt-3 px-2 d-flex align-items-center gap-2 small">
+      <span class="ft-avatar <%= usuario.tipo_perfil === 'ADMINISTRADOR' ? 'admin' : '' %>" aria-hidden="true"><%= f.iniciais(usuario.nome) %></span>
+      <div class="lh-sm text-truncate">
+        <div class="fw-semibold text-truncate"><%= usuario.nome %></div>
+        <div class="text-muted"><%= f.ROTULOS.perfil[usuario.tipo_perfil] %></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="ft-principal">
+    <header class="ft-topo-movel">
+      <a href="/painel" class="ft-marca"><span class="logo" aria-hidden="true">F</span>FitTrack</a>
+      <button class="btn btn-link text-reset fs-4 p-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#menuMovel" aria-controls="menuMovel" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+      </button>
+    </header>
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="menuMovel" aria-labelledby="menuMovelTitulo" style="background: var(--ft-lateral); width: 280px;">
+      <div class="offcanvas-header">
+        <span class="ft-marca" id="menuMovelTitulo"><span class="logo" aria-hidden="true">F</span>FitTrack</span>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fechar menu"></button>
+      </div>
+      <div class="offcanvas-body pt-0"><%- include('menu') %></div>
+    </div>
+
+    <main class="ft-conteudo" id="conteudo">
+      <%- include('flash') %>

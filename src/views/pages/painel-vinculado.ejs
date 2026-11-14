@@ -1,0 +1,13 @@
+<%- include('../partials/app-topo') %>
+<div class="ft-cabecalho">
+  <div>
+    <h1>Olá, <%= f.primeiroNome(usuario.nome) %>!</h1>
+    <div class="sub">Seu acompanhamento com <strong><%= administrador ? administrador.nome : 'seu administrador' %></strong> · <%= painel.semana.rotulo %></div>
+  </div>
+  <div class="d-none d-md-flex align-items-center gap-2 small"><span class="ft-avatar"><%= f.iniciais(usuario.nome) %></span><%= usuario.nome %></div>
+</div>
+<div class="ft-aviso info mb-3" role="note">
+  <i class="bi bi-info-circle me-1" aria-hidden="true"></i>Seus treinos e metas são definidos e atualizados pelo seu administrador. Fale com ele(a) para ajustar o plano.
+</div>
+<%- include('../partials/painel-corpo', { painel, pre: '/atribuidos', leitura: true }) %>
+<%- include('../partials/app-rodape') %>

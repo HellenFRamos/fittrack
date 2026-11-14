@@ -1,0 +1,97 @@
+<%- include('../../partials/app-topo') %>
+<%
+  const base = `${ctx.prefixo}/treinos`;
+  const leitura = ctx.somenteLeitura;
+  const qs = (pg) => { const p = new URLSearchParams(); Object.entries(filtros).forEach(([k, v]) => { if (v) p.set(k, v); }); if (pg > 1) p.set('pagina', pg); const s = p.toString(); return s ? `?${s}` : ''; };
+  const filtrando = Object.values(filtros).some(Boolean);
+%>
+<div class="ft-cabecalho">
+  <div>
+    <h1><%= ctx.rotulos.treinos %></h1>
+    <div class="sub"><%= resultado.total %> treino<%= resultado.total === 1 ? '' : 's' %><%= filtrando ? ' no filtro' : '' %></div>
+    <% if (ctx.tipo === 'vinculado') { %><div class="ft-migalhas"><a href="/admin/vinculados">Usuários vinculados</a> › <a href="<%= ctx.prefixo %>"><%= ctx.dono.nome %></a> › Treinos</div><% } %>
+  </div>
+  <% if (!leitura) { %>
+    <a href="<%= base %>/novo" class="btn <%= ctx.tipo === 'vinculado' ? 'btn-admin' : 'btn-primary' %>"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i><%= ctx.tipo === 'vinculado' ? 'Atribuir treino' : 'Registrar treino' %></a>
+  <% } %>
+</div>
+<% if (leitura) { %><div class="ft-aviso info mb-3"><i class="bi bi-eye me-1" aria-hidden="true"></i>Somente leitura: os treinos são cadastrados pelo seu administrador.</div><% } %>
+
+<form class="ft-card mb-3" method="get" action="<%= base %>" aria-label="Filtrar treinos">
+  <div class="row g-2 align-items-end">
+    <div class="col-6 col-md-3"><label class="form-label" for="de">De</label><input class="form-control" type="date" id="de" name="de" value="<%= filtros.de %>"></div>
+    <div class="col-6 col-md-3"><label class="form-label" for="ate">Até</label><input class="form-control" type="date" id="ate" name="ate" value="<%= filtros.ate %>"></div>
+    <div class="col-6 col-md-2">
+      <label class="form-label" for="modalidade">Modalidade</label>
+      <select class="form-select" id="modalidade" name="modalidade"><option value="">Todas</option>
+        <% modalidades.forEach(function (m) { %><option value="<%= m.id_modalidade %>" <%= Number(filtros.modalidade) === m.id_modalidade ? 'selected' : '' %>><%= m.nome %></option><% }) %>
+      </select>
+    </div>
+    <div class="col-6 col-md-2">
+      <label class="form-label" for="status">Situação</label>
+      <select class="form-select" id="status" name="status"><option value="">Todas</option>
+        <option value="REALIZADO" <%= filtros.status === 'REALIZADO' ? 'selected' : '' %>>Realizado</option>
+        <option value="PLANEJADO" <%= filtros.status === 'PLANEJADO' ? 'selected' : '' %>>Planejado</option>
+      </select>
+    </div>
+    <div class="col-md-2 d-flex gap-2"><button class="btn btn-primary flex-fill" type="submit">Filtrar</button>
+      <% if (filtrando) { %><a class="btn btn-outline-secondary" href="<%= base %>" aria-label="Limpar filtros"><i class="bi bi-x-lg" aria-hidden="true"></i></a><% } %></div>
+  </div>
+</form>
+
+<section class="ft-card" aria-label="Lista de treinos">
+  <% if (!resultado.itens.length) { %>
+    <div class="ft-vazio"><i class="bi bi-lightning-charge" aria-hidden="true"></i>
+      <%= filtrando ? 'Nenhum treino encontrado com esses filtros.' : (leitura ? 'Seu administrador ainda não atribuiu treinos.' : 'Nenhum treino registrado ainda.') %>
+      <% if (!leitura && !filtrando) { %><div class="mt-2"><a class="btn btn-primary btn-sm" href="<%= base %>/novo"><%= ctx.tipo === 'vinculado' ? 'Atribuir o primeiro treino' : 'Registrar o primeiro treino' %></a></div><% } %>
+    </div>
+  <% } else { %>
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead><tr><th scope="col">Data</th><th scope="col">Treino</th><th scope="col" class="d-none d-md-table-cell">Modalidade</th><th scope="col" class="d-none d-sm-table-cell">Duração</th><th scope="col" class="d-none d-lg-table-cell">Intensidade</th><th scope="col" class="d-none d-lg-table-cell">Calorias</th><th scope="col">Situação</th><th scope="col" class="d-none d-sm-table-cell"><span class="visually-hidden">Ações</span></th></tr></thead>
+        <tbody>
+          <% resultado.itens.forEach(function (t) { const atrib = Number(t.id_criador) !== Number(t.id_usuario); %>
+            <tr>
+              <td class="text-nowrap num"><%= d.diaSemana(t.data_treino) %></td>
+              <td><a class="fw-semibold" href="<%= base %>/<%= t.id_treino %>"><%= t.titulo %></a>
+                <% if (atrib && ctx.tipo !== 'vinculado') { %><div class="small text-muted">atribuído por <%= f.nomeCurto(t.criador_nome) %></div><% } %>
+                <div class="small text-muted d-md-none"><%= t.modalidade %><span class="d-sm-none"> · <%= t.duracao_min %> min</span></div></td>
+              <td class="d-none d-md-table-cell"><%= t.modalidade %></td>
+              <td class="d-none d-sm-table-cell text-nowrap num"><%= t.duracao_min %> min</td>
+              <td class="d-none d-lg-table-cell"><%= f.ROTULOS.intensidade[t.intensidade] %></td>
+              <td class="d-none d-lg-table-cell num"><%= t.calorias_estimadas ? `${t.calorias_estimadas} kcal` : '—' %></td>
+              <td><span class="ft-selo <%= t.status === 'PLANEJADO' ? 'lavanda' : 'verde' %>"><%= f.ROTULOS.statusTreino[t.status] %></span></td>
+              <td class="d-none d-sm-table-cell text-end text-nowrap">
+                <% if (!leitura) { %>
+                  <% if (t.status === 'PLANEJADO' && t.data_treino <= d.hojeISO()) { %>
+                    <form method="post" action="<%= base %>/<%= t.id_treino %>/realizado" class="d-inline">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="voltar" value="lista">
+                      <button class="btn btn-xs btn-primary" type="submit" title="Marcar como realizado">Realizado</button>
+                    </form>
+                  <% } %>
+                  <a class="btn btn-xs btn-outline-secondary" href="<%= base %>/<%= t.id_treino %>/editar" aria-label="Editar <%= t.titulo %>"><i class="bi bi-pencil" aria-hidden="true"></i></a>
+                  <form method="post" action="<%= base %>/<%= t.id_treino %>/excluir" class="d-inline" data-confirmar="Excluir o treino “<%= t.titulo %>” e seus exercícios?">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button class="btn btn-xs btn-perigo" type="submit" aria-label="Excluir <%= t.titulo %>"><i class="bi bi-trash" aria-hidden="true"></i></button>
+                  </form>
+                <% } else { %><a class="btn btn-xs btn-outline-secondary" href="<%= base %>/<%= t.id_treino %>">Ver</a><% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <% if (resultado.paginas > 1) { %>
+      <nav class="mt-3" aria-label="Paginação">
+        <ul class="pagination pagination-sm justify-content-center mb-0">
+          <li class="page-item <%= resultado.pagina <= 1 ? 'disabled' : '' %>"><a class="page-link" href="<%= base %><%= qs(resultado.pagina - 1) %>">Anterior</a></li>
+          <% for (let i = 1; i <= resultado.paginas; i++) { %>
+            <li class="page-item <%= i === resultado.pagina ? 'active' : '' %>"><a class="page-link" href="<%= base %><%= qs(i) %>" <%= i === resultado.pagina ? 'aria-current=page' : '' %>><%= i %></a></li>
+          <% } %>
+          <li class="page-item <%= resultado.pagina >= resultado.paginas ? 'disabled' : '' %>"><a class="page-link" href="<%= base %><%= qs(resultado.pagina + 1) %>">Próxima</a></li>
+        </ul>
+      </nav>
+    <% } %>
+  <% } %>
+</section>
+<%- include('../../partials/app-rodape') %>

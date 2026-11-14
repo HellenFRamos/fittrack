@@ -1,0 +1,44 @@
+<%- include('../partials/app-topo') %>
+<div class="ft-cabecalho">
+  <div>
+    <h1>Olá, <%= f.primeiroNome(usuario.nome) %>! 👋</h1>
+    <div class="sub"><%= painel.semana.rotulo %></div>
+  </div>
+  <a href="/treinos/novo" class="btn btn-primary"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Registrar treino</a>
+</div>
+
+<% if (painel.vazio) { %>
+  <div class="ft-card mb-3" style="background: var(--ft-lateral);">
+    <h2 class="h5">Bem-vindo(a) ao FitTrack! Vamos começar?</h2>
+    <p class="mb-3">Seu painel ainda está vazio. Registre o primeiro treino e crie uma meta para acompanhar sua evolução semana a semana.</p>
+    <div class="d-flex flex-wrap gap-2">
+      <a href="/treinos/novo" class="btn btn-primary">Registrar primeiro treino</a>
+      <a href="/metas/nova" class="btn btn-outline-secondary">Criar primeira meta</a>
+      <a href="/medidas" class="btn btn-outline-secondary">Registrar medidas</a>
+    </div>
+  </div>
+<% } %>
+
+<% if (resumo) { %>
+  <section class="ft-card mb-3" style="border-color: #DCD6F4;" aria-labelledby="tAlunos">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <h2 id="tAlunos" class="mb-0"><i class="bi bi-people me-1" style="color: var(--ft-admin-texto);" aria-hidden="true"></i>Seus usuários vinculados</h2>
+      <a class="btn btn-admin btn-sm" href="/admin/vinculados">Gerenciar vinculados</a>
+    </div>
+    <div class="row g-3 mt-1">
+      <div class="col-6 col-md-3"><div class="ft-kpi"><div class="rotulo">Ativos</div><div class="valor num"><%= resumo.total %></div></div></div>
+      <div class="col-6 col-md-3"><div class="ft-kpi"><div class="rotulo">Treinaram na semana</div><div class="valor num"><%= resumo.treinaramSemana %> <small>/ <%= resumo.total %></small></div></div></div>
+      <div class="col-md-6">
+        <div class="rotulo small text-muted mb-1">Sem treinar há mais de 7 dias</div>
+        <% if (resumo.semTreinar.length) { %>
+          <div class="d-flex flex-wrap gap-1">
+            <% resumo.semTreinar.forEach(function (v) { %><a class="ft-selo pessego text-decoration-none" href="/admin/vinculados/<%= v.id_usuario %>"><%= v.nome %> · <%= v.ultimo_treino ? d.relativo(v.ultimo_treino) : 'nunca treinou' %></a><% }) %>
+          </div>
+        <% } else { %><span class="small ft-sobe fw-semibold">Todos treinaram recentemente 🎉</span><% } %>
+      </div>
+    </div>
+  </section>
+<% } %>
+
+<%- include('../partials/painel-corpo', { painel, pre: '', leitura: false }) %>
+<%- include('../partials/app-rodape') %>

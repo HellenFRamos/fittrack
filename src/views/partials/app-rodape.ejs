@@ -1,0 +1,39 @@
+    </main>
+  </div>
+</div>
+
+<%
+  const vinc = usuario.tipo_perfil === 'VINCULADO';
+  const pre = vinc ? '/atribuidos' : '';
+  const at = (p) => (caminho === p || caminho.startsWith(p + '/')) ? 'ativo' : '';
+%>
+<nav class="ft-barra-inferior" aria-label="Navegação principal">
+  <a href="/painel" class="<%= at('/painel') %>"><i class="bi bi-grid-1x2" aria-hidden="true"></i>Painel</a>
+  <a href="<%= pre %>/treinos" class="<%= at(pre + '/treinos') %>"><i class="bi bi-lightning-charge" aria-hidden="true"></i>Treinos</a>
+  <a href="<%= pre %>/metas" class="<%= at(pre + '/metas') %>"><i class="bi bi-bullseye" aria-hidden="true"></i>Metas</a>
+  <a href="/perfil" class="<%= at('/perfil') %>"><i class="bi bi-person-circle" aria-hidden="true"></i>Perfil</a>
+</nav>
+<% if (!vinc && !caminho.endsWith('/novo') && !caminho.endsWith('/editar')) { %>
+  <a href="/treinos/novo" class="btn btn-primary ft-fab"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Registrar treino</a>
+<% } %>
+
+<!-- Confirmação antes de excluir/desativar (RF06, UC07 A4, UC10 A2) -->
+<div class="modal fade" id="modalConfirmar" tabindex="-1" aria-labelledby="modalConfirmarTitulo" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius: 16px;">
+      <div class="modal-header border-0 pb-0"><h2 class="modal-title fs-5" id="modalConfirmarTitulo">Confirmar</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div>
+      <div class="modal-body" id="modalConfirmarTexto"></div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-perigo" id="modalConfirmarOk">Confirmar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/vendor/chart.js/chart.umd.min.js"></script>
+<script src="/js/app.js"></script>
+</body>
+</html>

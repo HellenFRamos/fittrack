@@ -1,0 +1,10 @@
+<% const atribuido = Number(t.id_criador) !== Number(t.id_usuario); %>
+<a class="ft-item" href="<%= link %>">
+  <div class="d-flex justify-content-between align-items-start gap-2">
+    <div class="min-w-0">
+      <div class="ft-item-titulo"><%= t.titulo %></div>
+      <div class="ft-item-sub"><%= d.diaSemana(t.data_treino) %> · <%= t.modalidade %> · <%= t.duracao_min %> min<% if (typeof mostrarCriador !== 'undefined' && mostrarCriador && atribuido) { %> · atribuído por <%= f.nomeCurto(t.criador_nome) %><% } %></div>
+    </div>
+    <span class="ft-selo <%= t.status === 'PLANEJADO' ? 'lavanda' : 'verde' %>"><%= f.ROTULOS.statusTreino[t.status] %></span>
+  </div>
+</a>

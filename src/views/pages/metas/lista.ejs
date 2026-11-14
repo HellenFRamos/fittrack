@@ -1,0 +1,38 @@
+<%- include('../../partials/app-topo') %>
+<% const base = `${ctx.prefixo}/metas`; const leitura = ctx.somenteLeitura; %>
+<div class="ft-cabecalho">
+  <div>
+    <h1><%= ctx.rotulos.metas %></h1>
+    <div class="sub"><%= contagem.ATIVA %> ativa<%= contagem.ATIVA === 1 ? '' : 's' %> · <%= contagem.CONCLUIDA %> concluída<%= contagem.CONCLUIDA === 1 ? '' : 's' %></div>
+    <% if (ctx.tipo === 'vinculado') { %><div class="ft-migalhas"><a href="/admin/vinculados">Usuários vinculados</a> › <a href="<%= ctx.prefixo %>"><%= ctx.dono.nome %></a> › Metas</div><% } %>
+  </div>
+  <% if (!leitura) { %><a class="btn <%= ctx.tipo === 'vinculado' ? 'btn-admin' : 'btn-primary' %>" href="<%= base %>/nova"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i><%= ctx.tipo === 'vinculado' ? 'Atribuir meta' : 'Nova meta' %></a><% } %>
+</div>
+<% if (leitura) { %><div class="ft-aviso info mb-3"><i class="bi bi-eye me-1" aria-hidden="true"></i>Somente leitura: suas metas e o progresso delas são atualizados pelo seu administrador.</div><% } %>
+
+<nav class="ft-chips mb-3" aria-label="Filtrar por situação">
+  <a href="<%= base %>" class="<%= !filtro ? 'ativo' : '' %>">Todas</a>
+  <a href="<%= base %>?status=ATIVA" class="<%= filtro === 'ATIVA' ? 'ativo' : '' %>">Ativas (<%= contagem.ATIVA %>)</a>
+  <a href="<%= base %>?status=CONCLUIDA" class="<%= filtro === 'CONCLUIDA' ? 'ativo' : '' %>">Concluídas (<%= contagem.CONCLUIDA %>)</a>
+  <a href="<%= base %>?status=CANCELADA" class="<%= filtro === 'CANCELADA' ? 'ativo' : '' %>">Canceladas (<%= contagem.CANCELADA %>)</a>
+</nav>
+
+<% if (!metas.length) { %>
+  <div class="ft-card ft-vazio"><i class="bi bi-bullseye" aria-hidden="true"></i><%= leitura ? 'Nenhuma meta atribuída ainda.' : 'Nenhuma meta aqui.' %>
+    <% if (!leitura) { %><div class="mt-2"><a class="btn btn-primary btn-sm" href="<%= base %>/nova">Criar meta</a></div><% } %></div>
+<% } else { %>
+  <div class="row g-3">
+    <% metas.forEach(function (m) { %>
+      <div class="col-md-6 col-xl-4">
+        <div class="ft-card h-100 <%= m.vencida ? 'border-warning-subtle' : '' %>" style="<%= m.vencida || m.perto_do_prazo ? 'border-color: #F5D5BE;' : '' %>">
+          <div class="d-flex justify-content-between mb-2">
+            <span class="ft-selo <%= m.status === 'ATIVA' ? 'verde' : m.status === 'CONCLUIDA' ? 'azul' : 'cinza' %>"><%= f.ROTULOS.statusMeta[m.status] %></span>
+            <span class="small text-muted"><%= f.ROTULOS.tipoMeta[m.tipo] %></span>
+          </div>
+          <%- include('../../partials/meta-item', { m, link: `${base}/${m.id_meta}`, mostrarCriador: true }) %>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+<% } %>
+<%- include('../../partials/app-rodape') %>

@@ -1,0 +1,30 @@
+{
+  "name": "fittrack",
+  "version": "1.0.0",
+  "description": "FitTrack – plataforma web para registro e acompanhamento de treinos, metas e medidas corporais (OTES02 – UDESC)",
+  "main": "src/server.js",
+  "private": true,
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "db:setup": "node scripts/db-setup.js",
+    "db:demo": "node scripts/db-demo.js",
+    "db:reset": "node scripts/db-setup.js && node scripts/db-demo.js"
+  },
+  "author": "Hellen Figueiredo Ramos e Lize Ana Zabote",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "bootstrap": "5.3",
+    "bootstrap-icons": "^1.13.2",
+    "chart.js": "^4.6.1",
+    "dotenv": "^18.0.10",
+    "ejs": "^7.0.2",
+    "express": "^4.22.3",
+    "express-mysql-session": "^3.0.3",
+    "express-session": "^1.19.0",
+    "express-validator": "^7.3.2",
+    "helmet": "^8.3.0",
+    "mysql2": "^3.24.6"
+  }
+}

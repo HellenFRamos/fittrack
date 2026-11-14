@@ -1,0 +1,71 @@
+<%- include('../../partials/app-topo') %>
+<%
+  const base = `${ctx.prefixo}/treinos`;
+  const t = treino;
+  const leitura = ctx.somenteLeitura;
+  const atribuido = Number(t.id_criador) !== Number(t.id_usuario);
+%>
+<div class="ft-cabecalho">
+  <div>
+    <h1><%= t.titulo %></h1>
+    <div class="ft-migalhas">
+      <% if (ctx.tipo === 'vinculado') { %><a href="/admin/vinculados">Usuários vinculados</a> › <a href="<%= ctx.prefixo %>"><%= ctx.dono.nome %></a> › <% } %>
+      <a href="<%= base %>"><%= ctx.tipo === 'vinculado' ? 'Treinos' : ctx.rotulos.treinos %></a> › Detalhes
+    </div>
+  </div>
+  <div class="d-flex flex-wrap gap-2">
+    <% if (!leitura) { %>
+      <% if (t.status === 'PLANEJADO' && t.data_treino <= d.hojeISO()) { %>
+        <form method="post" action="<%= base %>/<%= t.id_treino %>/realizado"><input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button class="btn btn-primary" type="submit"><i class="bi bi-check2 me-1" aria-hidden="true"></i>Marcar como realizado</button></form>
+      <% } %>
+      <a class="btn btn-outline-secondary" href="<%= base %>/<%= t.id_treino %>/editar"><i class="bi bi-pencil me-1" aria-hidden="true"></i>Editar</a>
+      <% if (usuario.tipo_perfil !== 'VINCULADO') { %><a class="btn btn-outline-secondary" href="<%= base %>/novo?copiar=<%= t.id_treino %>"><i class="bi bi-copy me-1" aria-hidden="true"></i>Repetir</a><% } %>
+      <form method="post" action="<%= base %>/<%= t.id_treino %>/excluir" data-confirmar="Excluir este treino e todos os seus exercícios?"><input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button class="btn btn-perigo" type="submit"><i class="bi bi-trash me-1" aria-hidden="true"></i>Excluir</button></form>
+    <% } %>
+  </div>
+</div>
+
+<% if (leitura || atribuido) { %>
+  <div class="ft-aviso <%= leitura ? 'info' : 'admin' %> mb-3"><i class="bi bi-person-badge me-1" aria-hidden="true"></i>Atribuído por <strong><%= t.criador_nome %></strong><%= leitura ? ' · somente leitura' : '' %></div>
+<% } %>
+
+<div class="row g-3">
+  <div class="col-lg-4">
+    <section class="ft-card h-100" aria-labelledby="tResumo">
+      <h2 id="tResumo">Resumo</h2>
+      <dl class="row small mb-0">
+        <dt class="col-6 text-muted fw-normal">Data</dt><dd class="col-6"><%= d.diaSemana(t.data_treino) %>/<%= t.data_treino.slice(0, 4) %></dd>
+        <dt class="col-6 text-muted fw-normal">Situação</dt><dd class="col-6"><span class="ft-selo <%= t.status === 'PLANEJADO' ? 'lavanda' : 'verde' %>"><%= f.ROTULOS.statusTreino[t.status] %></span></dd>
+        <dt class="col-6 text-muted fw-normal">Modalidade</dt><dd class="col-6"><%= t.modalidade %></dd>
+        <dt class="col-6 text-muted fw-normal">Duração</dt><dd class="col-6 num"><%= t.duracao_min %> min</dd>
+        <dt class="col-6 text-muted fw-normal">Intensidade</dt><dd class="col-6"><%= f.ROTULOS.intensidade[t.intensidade] %></dd>
+        <dt class="col-6 text-muted fw-normal">Calorias estimadas</dt><dd class="col-6 num"><%= t.calorias_estimadas ? `≈ ${t.calorias_estimadas} kcal` : '— (sem peso registrado)' %></dd>
+      </dl>
+      <% if (t.observacoes) { %><h3 class="h6 mt-3">Observações</h3><p class="small mb-0" style="white-space: pre-line;"><%= t.observacoes %></p><% } %>
+    </section>
+  </div>
+  <div class="col-lg-8">
+    <section class="ft-card h-100" aria-labelledby="tEx">
+      <h2 id="tEx">Exercícios</h2>
+      <% if (itens.length) { %>
+        <div class="table-responsive">
+          <table class="table">
+            <thead><tr><th scope="col">#</th><th scope="col">Exercício</th><th scope="col">Séries</th><th scope="col">Repetições</th><th scope="col">Carga</th><th scope="col">Distância</th><th scope="col">Tempo</th></tr></thead>
+            <tbody>
+              <% itens.forEach(function (it) { %>
+                <tr><td class="text-muted"><%= it.ordem %></td><td class="fw-semibold"><%= it.exercicio %><div class="small text-muted fw-normal"><%= it.grupo_muscular %></div></td>
+                  <td class="num"><%= it.series ?? '—' %></td><td class="num"><%= it.repeticoes ?? '—' %></td>
+                  <td class="num"><%= it.carga_kg ? `${f.num(it.carga_kg)} kg` : '—' %></td>
+                  <td class="num"><%= it.distancia_km ? `${f.num(it.distancia_km, 2)} km` : '—' %></td>
+                  <td class="num"><%= it.tempo_seg ? f.tempo(it.tempo_seg) : '—' %></td></tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %><div class="ft-vazio">Nenhum exercício neste treino.</div><% } %>
+    </section>
+  </div>
+</div>
+<%- include('../../partials/app-rodape') %>

@@ -1,0 +1,113 @@
+<%- include('../../partials/app-topo') %>
+<%
+  const base = `${ctx.prefixo}/metas`;
+  const leitura = ctx.somenteLeitura;
+  const m = meta;
+  const atribuida = Number(m.id_criador) !== Number(m.id_usuario);
+  const pontos = [{ data: m.data_inicio, valor: Number(m.valor_inicial) }].concat(historico.map((h) => ({ data: h.data_registro, valor: Number(h.valor) })));
+%>
+<div class="ft-cabecalho">
+  <div>
+    <h1><%= m.titulo %></h1>
+    <div class="ft-migalhas">
+      <% if (ctx.tipo === 'vinculado') { %><a href="/admin/vinculados">Usuários vinculados</a> › <a href="<%= ctx.prefixo %>"><%= ctx.dono.nome %></a> › <% } %>
+      <a href="<%= base %>"><%= ctx.tipo === 'vinculado' ? 'Metas' : ctx.rotulos.metas %></a> › Detalhes
+    </div>
+  </div>
+  <% if (!leitura) { %>
+    <div class="d-flex flex-wrap gap-2">
+      <a class="btn btn-outline-secondary" href="<%= base %>/<%= m.id_meta %>/editar"><i class="bi bi-pencil me-1" aria-hidden="true"></i><%= m.vencida ? 'Prorrogar / editar' : 'Editar' %></a>
+      <% if (m.status === 'ATIVA') { %>
+        <form method="post" action="<%= base %>/<%= m.id_meta %>/cancelar" data-confirmar="Cancelar esta meta? Ela sai do painel, mas continua no histórico."><input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-slash-circle me-1" aria-hidden="true"></i>Cancelar meta</button></form>
+      <% } else if (m.status === 'CANCELADA') { %>
+        <form method="post" action="<%= base %>/<%= m.id_meta %>/reativar"><input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-arrow-counterclockwise me-1" aria-hidden="true"></i>Reativar</button></form>
+      <% } %>
+      <form method="post" action="<%= base %>/<%= m.id_meta %>/excluir" data-confirmar="Excluir esta meta e todo o histórico de progresso? Esta ação não pode ser desfeita."><input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button class="btn btn-perigo" type="submit"><i class="bi bi-trash me-1" aria-hidden="true"></i>Excluir</button></form>
+    </div>
+  <% } %>
+</div>
+
+<% if (parabens) { %>
+  <div class="ft-aviso sucesso mb-3 fs-6" role="status"><strong>🎉 Parabéns! Meta atingida.</strong> “<%= m.titulo %>” chegou a 100% e foi marcada como concluída.</div>
+<% } %>
+<% if (m.vencida && !leitura) { %>
+  <div class="ft-aviso pessego mb-3" role="alert"><i class="bi bi-alarm me-1" aria-hidden="true"></i>O prazo desta meta venceu em <%= d.br(m.data_limite) %>. Você pode <a href="<%= base %>/<%= m.id_meta %>/editar">prorrogar o prazo</a> ou cancelar a meta.</div>
+<% } %>
+<% if (atribuida) { %>
+  <div class="ft-aviso <%= leitura ? 'info' : 'admin' %> mb-3"><i class="bi bi-person-badge me-1" aria-hidden="true"></i>Atribuída por <strong><%= m.criador_nome %></strong><%= leitura ? ' · somente leitura' : '' %></div>
+<% } %>
+
+<div class="row g-3">
+  <div class="col-lg-5">
+    <section class="ft-card mb-3" aria-labelledby="tSit">
+      <div class="d-flex justify-content-between align-items-center">
+        <h2 id="tSit" class="mb-0">Situação</h2>
+        <span class="ft-selo <%= m.status === 'ATIVA' ? 'verde' : m.status === 'CONCLUIDA' ? 'azul' : 'cinza' %>"><%= f.ROTULOS.statusMeta[m.status] %></span>
+      </div>
+      <div class="ft-kpi mt-3"><div class="valor num"><%= m.percentual %>%</div><div class="rotulo">concluído</div></div>
+      <div class="ft-barra my-2 <%= m.status === 'CONCLUIDA' ? 'concluida' : (m.perto_do_prazo || m.vencida) ? 'alerta' : '' %>" role="progressbar" aria-valuenow="<%= m.percentual %>" aria-valuemin="0" aria-valuemax="100" aria-label="Progresso"><span style="width: <%= m.percentual %>%"></span></div>
+      <dl class="row small mb-0 mt-3">
+        <dt class="col-6 text-muted fw-normal">Tipo</dt><dd class="col-6"><%= f.ROTULOS.tipoMeta[m.tipo] %></dd>
+        <dt class="col-6 text-muted fw-normal">Valor inicial</dt><dd class="col-6 num"><%= f.num(m.valor_inicial, 2) %> <%= m.unidade %></dd>
+        <dt class="col-6 text-muted fw-normal">Valor atual</dt><dd class="col-6 num fw-semibold"><%= f.num(m.valor_atual, 2) %> <%= m.unidade %></dd>
+        <dt class="col-6 text-muted fw-normal">Valor-alvo</dt><dd class="col-6 num"><%= f.num(m.valor_alvo, 2) %> <%= m.unidade %></dd>
+        <dt class="col-6 text-muted fw-normal">Início</dt><dd class="col-6"><%= d.br(m.data_inicio) %></dd>
+        <dt class="col-6 text-muted fw-normal">Prazo</dt><dd class="col-6"><%= d.br(m.data_limite) %><% if (m.status === 'ATIVA') { %> <span class="small <%= m.vencida || m.perto_do_prazo ? 'ft-alerta fw-semibold' : 'text-muted' %>">(<%= m.vencida ? 'vencido' : m.dias_restantes === 0 ? 'hoje' : `${m.dias_restantes} dias` %>)</span><% } %></dd>
+      </dl>
+    </section>
+
+    <% if (!leitura && m.status === 'ATIVA') { %>
+      <section class="ft-card" aria-labelledby="tReg">
+        <h2 id="tReg">Registrar progresso</h2>
+        <form method="post" action="<%= base %>/<%= m.id_meta %>/progresso" novalidate>
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <div class="row g-2">
+            <div class="col-6">
+              <label class="form-label obrig" for="data_registro">Data</label>
+              <input class="form-control <%= erros.data_registro ? 'is-invalid' : '' %>" type="date" id="data_registro" name="data_registro" value="<%= progresso.data_registro %>" max="<%= d.hojeISO() %>">
+              <%- include('../../partials/erro-campo', { campo: 'data_registro' }) %>
+            </div>
+            <div class="col-6">
+              <label class="form-label obrig" for="valor">Valor atual (<%= m.unidade %>)</label>
+              <input class="form-control <%= erros.valor ? 'is-invalid' : '' %>" type="number" step="0.01" inputmode="decimal" id="valor" name="valor" value="<%= Number.isNaN(progresso.valor) ? '' : progresso.valor %>">
+              <%- include('../../partials/erro-campo', { campo: 'valor' }) %>
+            </div>
+            <div class="col-12">
+              <label class="form-label" for="observacao">Observação</label>
+              <input class="form-control" id="observacao" name="observacao" maxlength="255" value="<%= progresso.observacao || '' %>" placeholder="Opcional">
+            </div>
+          </div>
+          <button class="btn btn-primary mt-3" type="submit">Registrar progresso</button>
+        </form>
+      </section>
+    <% } %>
+  </div>
+
+  <div class="col-lg-7">
+    <section class="ft-card mb-3" aria-labelledby="tEvo">
+      <h2 id="tEvo">Evolução</h2>
+      <div class="ft-grafico alto"><canvas role="img" aria-label="Gráfico de linha com a evolução do valor da meta" data-grafico="<%= JSON.stringify({ tipo: 'line', rotulos: pontos.map((p) => d.brCurta(p.data)), valores: pontos.map((p) => p.valor), sufixo: ' ' + m.unidade, referencia: Number(m.valor_alvo), rotuloReferencia: 'Alvo' }) %>"></canvas></div>
+      <p class="ft-valores mb-0">Linha tracejada = valor-alvo (<%= f.num(m.valor_alvo, 2) %> <%= m.unidade %>).</p>
+    </section>
+    <section class="ft-card" aria-labelledby="tHist">
+      <h2 id="tHist">Histórico de progresso</h2>
+      <% if (historico.length) { %>
+        <div class="table-responsive"><table class="table">
+          <thead><tr><th scope="col">Data</th><th scope="col">Valor</th><th scope="col">Observação</th><% if (!leitura) { %><th scope="col"><span class="visually-hidden">Ações</span></th><% } %></tr></thead>
+          <tbody>
+            <% historico.slice().reverse().forEach(function (h) { %>
+              <tr><td class="num"><%= d.br(h.data_registro) %></td><td class="num fw-semibold"><%= f.num(h.valor, 2) %> <%= m.unidade %></td><td class="small"><%= h.observacao || '—' %></td>
+                <% if (!leitura) { %><td class="text-end"><form method="post" action="<%= base %>/<%= m.id_meta %>/progresso/<%= h.id_progresso %>/excluir" data-confirmar="Remover este registro de progresso?"><input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button class="btn btn-xs btn-perigo" type="submit" aria-label="Remover registro de <%= d.br(h.data_registro) %>"><i class="bi bi-trash" aria-hidden="true"></i></button></form></td><% } %></tr>
+            <% }) %>
+            <tr class="text-muted"><td class="num"><%= d.br(m.data_inicio) %></td><td class="num"><%= f.num(m.valor_inicial, 2) %> <%= m.unidade %></td><td class="small">Valor inicial</td><% if (!leitura) { %><td></td><% } %></tr>
+          </tbody>
+        </table></div>
+      <% } else { %><div class="ft-vazio py-3">Nenhum progresso registrado ainda.</div><% } %>
+    </section>
+  </div>
+</div>
+<%- include('../../partials/app-rodape') %>

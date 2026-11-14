@@ -1,0 +1,92 @@
+<%# Corpo do painel: indicadores, gráfico de minutos, metas e treinos. Parâmetros: painel, pre (prefixo de links), leitura %>
+<%
+  const p = painel;
+  const dif = p.diferencaSemanaAnterior;
+  const rotDias = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+%>
+<div class="row g-3 mb-3">
+  <div class="col-6 col-lg-3"><div class="ft-card ft-kpi h-100">
+    <div class="rotulo">Treinos na semana</div>
+    <div class="valor num"><%= p.treinosSemana %></div>
+    <div class="nota <%= dif > 0 ? 'ft-sobe' : 'text-muted' %>"><%= dif > 0 ? `▲ ${dif} a mais que a anterior` : dif < 0 ? `▼ ${-dif} a menos que a anterior` : 'igual à semana anterior' %></div>
+  </div></div>
+  <div class="col-6 col-lg-3"><div class="ft-kpi ft-card h-100">
+    <div class="rotulo">Minutos ativos</div>
+    <div class="valor num"><%= p.minutos %> <small>/ <%= p.metaOms %></small></div>
+    <div class="ft-barra mt-2" role="progressbar" aria-valuenow="<%= p.percentualOms %>" aria-valuemin="0" aria-valuemax="100" aria-label="<%= p.minutos %> de <%= p.metaOms %> minutos recomendados pela OMS"><span style="width: <%= p.percentualOms %>%"></span></div>
+    <div class="nota text-muted mt-1"><%= p.minutos >= p.metaOms ? 'Recomendação da OMS atingida!' : `Faltam ${p.metaOms - p.minutos} min para a OMS` %></div>
+  </div></div>
+  <div class="col-6 col-lg-3"><div class="ft-card ft-kpi h-100">
+    <div class="rotulo">Metas ativas</div>
+    <div class="valor num"><%= p.metas.length %></div>
+    <div class="nota <%= p.metasVencendo ? 'ft-alerta' : 'text-muted' %>"><%= p.metasVencendo ? `${p.metasVencendo} vence${p.metasVencendo > 1 ? 'm' : ''} em até 7 dias` : 'nenhuma perto do prazo' %></div>
+  </div></div>
+  <div class="col-6 col-lg-3"><div class="ft-card ft-kpi h-100">
+    <div class="rotulo">Peso atual</div>
+    <% if (p.pesoAtual) { %>
+      <div class="valor num"><%= f.num(p.pesoAtual) %> <small>kg</small></div>
+      <div class="nota text-muted"><%= p.variacaoMes === null ? 'sem medição há 30 dias' : p.variacaoMes === 0 ? 'estável no mês' : `${p.variacaoMes < 0 ? '▼' : '▲'} ${f.num(Math.abs(p.variacaoMes))} kg no mês` %></div>
+    <% } else { %>
+      <div class="valor">—</div>
+      <div class="nota"><% if (!leitura) { %><a href="<%= pre %>/medidas">Registrar medida</a><% } else { %><span class="text-muted">sem medições</span><% } %></div>
+    <% } %>
+  </div></div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-lg-7">
+    <section class="ft-card h-100" aria-labelledby="tMinutos">
+      <h2 id="tMinutos">Minutos de atividade por dia</h2>
+      <div class="ft-grafico"><canvas role="img" aria-label="Gráfico de barras com os minutos de atividade em cada dia da semana" data-grafico="<%= JSON.stringify({ tipo: 'bar', rotulos: rotDias, valores: p.minutosPorDia, sufixo: ' min' }) %>"></canvas></div>
+      <p class="ft-valores mb-3"><span class="visually-hidden">Valores: </span><%= rotDias.map((r, i) => `${r} ${p.minutosPorDia[i]}`).join(' · ') %> (min)</p>
+      <h2 class="mt-2">Últimos treinos</h2>
+      <% if (p.ultimos.length) { %>
+        <ul class="ft-lista">
+          <% p.ultimos.forEach(function (t) { %><li><%- include('treino-item', { t, link: `${pre}/treinos/${t.id_treino}` }) %></li><% }) %>
+        </ul>
+      <% } else { %>
+        <div class="ft-vazio py-3"><i class="bi bi-lightning-charge" aria-hidden="true"></i>Nenhum treino realizado ainda.</div>
+      <% } %>
+    </section>
+  </div>
+  <div class="col-lg-5">
+    <section class="ft-card h-100" aria-labelledby="tMetas">
+      <div class="d-flex justify-content-between align-items-center"><h2 id="tMetas">Metas</h2><a class="small" href="<%= pre %>/metas">Ver todas</a></div>
+      <% if (p.metas.length) { %>
+        <ul class="ft-lista">
+          <% p.metas.forEach(function (m) { %><li><%- include('meta-item', { m, link: `${pre}/metas/${m.id_meta}`, mostrarCriador: leitura }) %></li><% }) %>
+        </ul>
+      <% } else { %>
+        <div class="ft-vazio"><i class="bi bi-bullseye" aria-hidden="true"></i>Nenhuma meta ativa.
+          <% if (!leitura) { %><div class="mt-2"><a class="btn btn-primary btn-sm" href="<%= pre %>/metas/nova">Criar meta</a></div><% } %></div>
+      <% } %>
+      <% if (p.planejados.length) { %>
+        <h2 class="mt-4">Próximos treinos planejados</h2>
+        <ul class="ft-lista">
+          <% p.planejados.forEach(function (t) { %><li><%- include('treino-item', { t, link: `${pre}/treinos/${t.id_treino}`, mostrarCriador: leitura }) %></li><% }) %>
+        </ul>
+      <% } %>
+    </section>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-7">
+    <section class="ft-card h-100" aria-labelledby="tVolume">
+      <h2 id="tVolume">Volume de treino por semana</h2>
+      <div class="ft-grafico"><canvas role="img" aria-label="Gráfico com os minutos de treino em cada uma das últimas 8 semanas" data-grafico="<%= JSON.stringify({ tipo: 'bar', rotulos: p.volume.map((s) => d.brCurta(s.inicio)), valores: p.volume.map((s) => s.minutos), sufixo: ' min', referencia: p.metaOms }) %>"></canvas></div>
+      <p class="ft-valores mb-0"><span class="visually-hidden">Valores: </span>Semanas iniciadas em <%= p.volume.map((s) => `${d.brCurta(s.inicio)}: ${s.minutos}`).join(' · ') %> (min). Linha tracejada = 150 min da OMS.</p>
+    </section>
+  </div>
+  <div class="col-lg-5">
+    <section class="ft-card h-100" aria-labelledby="tModal">
+      <h2 id="tModal">Frequência por modalidade <span class="small text-muted fw-normal">(90 dias)</span></h2>
+      <% if (p.frequencia.length) { %>
+        <div class="ft-grafico"><canvas role="img" aria-label="Gráfico de rosca com a quantidade de treinos por modalidade" data-grafico="<%= JSON.stringify({ tipo: 'doughnut', rotulos: p.frequencia.map((x) => x.modalidade), valores: p.frequencia.map((x) => x.treinos), sufixo: ' treinos' }) %>"></canvas></div>
+        <p class="ft-valores mb-0"><span class="visually-hidden">Valores: </span><%= p.frequencia.map((x) => `${x.modalidade}: ${x.treinos}`).join(' · ') %></p>
+      <% } else { %>
+        <div class="ft-vazio"><i class="bi bi-pie-chart" aria-hidden="true"></i>Sem treinos realizados nos últimos 90 dias.</div>
+      <% } %>
+    </section>
+  </div>
+</div>

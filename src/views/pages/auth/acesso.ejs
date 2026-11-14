@@ -1,0 +1,124 @@
+<%- include('../../partials/head') %>
+<body>
+<main class="ft-acesso" id="conteudo">
+  <section class="lado">
+    <a href="/" class="ft-marca"><span class="logo" aria-hidden="true">F</span>FitTrack</a>
+    <div class="my-4 my-md-auto">
+      <h2 class="mb-3">Seu progresso,<br>em cada treino.</h2>
+      <p class="mb-3">Registre treinos, defina metas e veja sua evolução semana a semana.</p>
+      <ul class="ft-check mb-0 small">
+        <li>Histórico completo de treinos e exercícios</li>
+        <li>Metas com barra de progresso e prazos</li>
+        <li>Acompanhamento pelo seu personal trainer</li>
+      </ul>
+    </div>
+    <p class="small text-muted mb-0 d-none d-md-block">O FitTrack não substitui orientação médica ou profissional.</p>
+  </section>
+
+  <section class="form-lado">
+    <div class="w-100 mx-auto" style="max-width: 440px;">
+      <% if (aba === 'entrar') { %>
+        <h1 class="h3 mb-1">Bem-vindo(a) de volta</h1>
+        <p class="text-muted small mb-3">Acesse sua conta para continuar.</p>
+      <% } else { %>
+        <h1 class="h3 mb-1">Crie sua conta</h1>
+        <p class="text-muted small mb-3">É gratuito e leva menos de um minuto.</p>
+      <% } %>
+
+      <div class="ft-abas" role="tablist" aria-label="Acesso">
+        <a href="/entrar" role="tab" aria-selected="<%= aba === 'entrar' %>" class="<%= aba === 'entrar' ? 'ativo' : '' %>">Entrar</a>
+        <a href="/cadastro" role="tab" aria-selected="<%= aba === 'cadastro' %>" class="<%= aba === 'cadastro' ? 'ativo' : '' %>">Criar conta</a>
+      </div>
+
+      <%- include('../../partials/flash') %>
+      <% if (erros.geral) { %><div class="ft-aviso erro mb-3" role="alert"><%= erros.geral %></div><% } %>
+
+      <% if (aba === 'entrar') { %>
+        <form method="post" action="/entrar" novalidate>
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <div class="mb-3">
+            <label class="form-label" for="email">E-mail</label>
+            <input class="form-control" type="email" id="email" name="email" value="<%= dados.email || '' %>" autocomplete="email" required autofocus>
+          </div>
+          <div class="mb-2">
+            <label class="form-label" for="senha">Senha</label>
+            <input class="form-control" type="password" id="senha" name="senha" autocomplete="current-password" required>
+          </div>
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="manter" name="manter" value="on" <%= dados.manter ? 'checked' : '' %>>
+            <label class="form-check-label small" for="manter">Manter conectado</label>
+          </div>
+          <button class="btn btn-primary w-100 py-2" type="submit">Entrar</button>
+          <p class="text-center small mt-3 mb-0">Ainda não tem conta? <a href="/cadastro" class="fw-semibold">Cadastre-se gratuitamente</a></p>
+        </form>
+      <% } else { %>
+        <form method="post" action="/cadastro" novalidate data-consentimento>
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <div class="mb-3">
+            <label class="form-label obrig" for="nome">Nome completo</label>
+            <input class="form-control <%= erros.nome ? 'is-invalid' : '' %>" id="nome" name="nome" value="<%= dados.nome || '' %>" autocomplete="name" maxlength="100" required>
+            <%- include('../../partials/erro-campo', { campo: 'nome' }) %>
+          </div>
+          <div class="mb-3">
+            <label class="form-label obrig" for="email">E-mail</label>
+            <input class="form-control <%= erros.email ? 'is-invalid' : '' %>" type="email" id="email" name="email" value="<%= dados.email || '' %>" autocomplete="email" maxlength="120" required>
+            <% if (erros.email === 'emUso') { %>
+              <div class="invalid-feedback d-block">Este e-mail já está em uso. <a href="/entrar">Entrar com ele?</a></div>
+            <% } else { %><%- include('../../partials/erro-campo', { campo: 'email' }) %><% } %>
+          </div>
+          <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+              <label class="form-label obrig" for="senha">Senha</label>
+              <input class="form-control <%= erros.senha ? 'is-invalid' : '' %>" type="password" id="senha" name="senha" autocomplete="new-password" aria-describedby="ajudaSenha" required>
+              <%- include('../../partials/erro-campo', { campo: 'senha' }) %>
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label obrig" for="confirmacao">Confirmar senha</label>
+              <input class="form-control <%= erros.confirmacao ? 'is-invalid' : '' %>" type="password" id="confirmacao" name="confirmacao" autocomplete="new-password" required>
+              <%- include('../../partials/erro-campo', { campo: 'confirmacao' }) %>
+            </div>
+            <div class="col-12 mt-1"><div id="ajudaSenha" class="form-text">Mínimo de 8 caracteres, com letras e números.</div></div>
+          </div>
+          <div class="row g-3 mb-3">
+            <div class="col-sm-5">
+              <label class="form-label obrig" for="data_nascimento">Nascimento</label>
+              <input class="form-control <%= erros.data_nascimento ? 'is-invalid' : '' %>" type="date" id="data_nascimento" name="data_nascimento" value="<%= dados.data_nascimento || '' %>" max="<%= d.hojeISO() %>" required>
+              <%- include('../../partials/erro-campo', { campo: 'data_nascimento' }) %>
+            </div>
+            <div class="col-sm-4">
+              <label class="form-label obrig" for="sexo">Sexo</label>
+              <select class="form-select <%= erros.sexo ? 'is-invalid' : '' %>" id="sexo" name="sexo" required>
+                <option value="">Selecione</option>
+                <% Object.entries(f.ROTULOS.sexo).forEach(function ([k, v]) { %>
+                  <option value="<%= k %>" <%= dados.sexo === k ? 'selected' : '' %>><%= k === 'O' ? 'Outro' : v %></option>
+                <% }) %>
+              </select>
+              <%- include('../../partials/erro-campo', { campo: 'sexo' }) %>
+            </div>
+            <div class="col-sm-3">
+              <label class="form-label" for="altura_cm">Altura (cm)</label>
+              <input class="form-control <%= erros.altura_cm ? 'is-invalid' : '' %>" type="number" inputmode="numeric" id="altura_cm" name="altura_cm" min="50" max="260" value="<%= dados.altura_cm || '' %>">
+              <%- include('../../partials/erro-campo', { campo: 'altura_cm' }) %>
+            </div>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input <%= erros.termos ? 'is-invalid' : '' %>" type="checkbox" id="termos" name="termos" value="on" <%= dados.termos ? 'checked' : '' %> required>
+            <label class="form-check-label small" for="termos">Li e aceito os <a href="/termos" target="_blank" rel="noopener">termos de uso</a> e a <a href="/privacidade" target="_blank" rel="noopener">política de privacidade</a>.</label>
+            <%- include('../../partials/erro-campo', { campo: 'termos' }) %>
+          </div>
+          <div class="form-check mb-3">
+            <input class="form-check-input <%= erros.consentimento ? 'is-invalid' : '' %>" type="checkbox" id="consentimento" name="consentimento" value="on" <%= dados.consentimento ? 'checked' : '' %> required>
+            <label class="form-check-label small" for="consentimento">Consinto com o tratamento dos meus <strong>dados de saúde</strong> (treinos, medidas e metas) para gerar meus registros e indicadores, conforme a LGPD.</label>
+            <%- include('../../partials/erro-campo', { campo: 'consentimento' }) %>
+          </div>
+          <button class="btn btn-primary w-100 py-2" type="submit" data-requer-consentimento>Criar conta</button>
+          <p class="text-center small mt-3 mb-0">Já tem conta? <a href="/entrar" class="fw-semibold">Entrar</a></p>
+        </form>
+      <% } %>
+    </div>
+  </section>
+</main>
+<script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/js/app.js"></script>
+</body>
+</html>

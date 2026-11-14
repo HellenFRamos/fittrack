@@ -1,0 +1,61 @@
+<%- include('../../partials/app-topo') %>
+<% const base = `${ctx.prefixo}/metas`; const editando = !!meta.id_meta; const v = (x) => (x === null || x === undefined || Number.isNaN(x)) ? '' : x; %>
+<div class="ft-cabecalho">
+  <div>
+    <h1><%= titulo %></h1>
+    <div class="ft-migalhas">
+      <% if (ctx.tipo === 'vinculado') { %><a href="/admin/vinculados">Usuários vinculados</a> › <a href="<%= ctx.prefixo %>"><%= ctx.dono.nome %></a> › <a href="<%= base %>">Metas</a><% } else { %><a href="<%= base %>">Minhas metas</a><% } %> › <%= editando ? 'Editar' : 'Nova' %>
+    </div>
+  </div>
+</div>
+<% if (ctx.tipo === 'vinculado') { %><div class="ft-aviso admin mb-3"><i class="bi bi-person-badge me-1" aria-hidden="true"></i>Meta <%= editando ? 'de' : 'para' %> <strong><%= ctx.dono.nome %></strong>.</div><% } %>
+<% if (Object.keys(erros).length) { %><div class="ft-aviso erro mb-3" role="alert">A meta não foi salva. Corrija os campos destacados.</div><% } %>
+
+<form class="ft-card" method="post" action="<%= acao %>" novalidate style="max-width: 760px;" data-unidades="<%= JSON.stringify(unidades) %>">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <div class="row g-3">
+    <div class="col-12">
+      <label class="form-label obrig" for="titulo">Título</label>
+      <input class="form-control <%= erros.titulo ? 'is-invalid' : '' %>" id="titulo" name="titulo" value="<%= meta.titulo %>" maxlength="100" placeholder="Ex.: Correr 5 km sem parar" required>
+      <%- include('../../partials/erro-campo', { campo: 'titulo' }) %>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label obrig" for="tipo">Tipo</label>
+      <select class="form-select <%= erros.tipo ? 'is-invalid' : '' %>" id="tipo" name="tipo">
+        <% tipos.forEach(function (tp) { %><option value="<%= tp %>" <%= meta.tipo === tp ? 'selected' : '' %>><%= f.ROTULOS.tipoMeta[tp] %></option><% }) %>
+      </select>
+      <%- include('../../partials/erro-campo', { campo: 'tipo' }) %>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label obrig" for="unidade">Unidade</label>
+      <input class="form-control <%= erros.unidade ? 'is-invalid' : '' %>" id="unidade" name="unidade" value="<%= meta.unidade %>" maxlength="20" placeholder="kg, km, min…">
+      <%- include('../../partials/erro-campo', { campo: 'unidade' }) %>
+    </div>
+    <div class="col-6">
+      <label class="form-label obrig" for="valor_inicial">Valor inicial</label>
+      <input class="form-control <%= erros.valor_inicial ? 'is-invalid' : '' %>" type="number" step="0.01" inputmode="decimal" id="valor_inicial" name="valor_inicial" value="<%= v(meta.valor_inicial) %>">
+      <%- include('../../partials/erro-campo', { campo: 'valor_inicial' }) %>
+    </div>
+    <div class="col-6">
+      <label class="form-label obrig" for="valor_alvo">Valor-alvo</label>
+      <input class="form-control <%= erros.valor_alvo ? 'is-invalid' : '' %>" type="number" step="0.01" inputmode="decimal" id="valor_alvo" name="valor_alvo" value="<%= v(meta.valor_alvo) %>">
+      <%- include('../../partials/erro-campo', { campo: 'valor_alvo' }) %>
+    </div>
+    <div class="col-6">
+      <label class="form-label obrig" for="data_inicio">Início</label>
+      <input class="form-control <%= erros.data_inicio ? 'is-invalid' : '' %>" type="date" id="data_inicio" name="data_inicio" value="<%= meta.data_inicio %>">
+      <%- include('../../partials/erro-campo', { campo: 'data_inicio' }) %>
+    </div>
+    <div class="col-6">
+      <label class="form-label obrig" for="data_limite">Prazo</label>
+      <input class="form-control <%= erros.data_limite ? 'is-invalid' : '' %>" type="date" id="data_limite" name="data_limite" value="<%= meta.data_limite %>">
+      <%- include('../../partials/erro-campo', { campo: 'data_limite' }) %>
+    </div>
+    <div class="col-12"><div class="form-text">Para metas de redução (ex.: perder peso), informe um valor-alvo menor que o inicial. O percentual é calculado por (atual − inicial) ÷ (alvo − inicial).</div></div>
+  </div>
+  <div class="d-flex gap-2 mt-3">
+    <button class="btn <%= ctx.tipo === 'vinculado' ? 'btn-admin' : 'btn-primary' %>" type="submit">Salvar meta</button>
+    <a class="btn btn-outline-secondary" href="<%= editando ? `${base}/${meta.id_meta}` : base %>">Cancelar</a>
+  </div>
+</form>
+<%- include('../../partials/app-rodape') %>

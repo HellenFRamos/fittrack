@@ -1,0 +1,24 @@
+<%- include('head') %>
+<body class="d-flex flex-column min-vh-100">
+<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>
+<nav class="navbar navbar-expand-md ft-publico-nav" aria-label="Navegação do site">
+  <div class="container">
+    <a class="ft-marca" href="/"><span class="logo" aria-hidden="true">F</span>FitTrack</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navPublica" aria-controls="navPublica" aria-expanded="false" aria-label="Abrir menu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navPublica">
+      <ul class="navbar-nav ms-auto align-items-md-center gap-md-2">
+        <li class="nav-item"><a class="nav-link" href="/">Início</a></li>
+        <li class="nav-item"><a class="nav-link" href="/sobre">Sobre / Contato</a></li>
+        <% if (usuario) { %>
+          <li class="nav-item"><a class="btn btn-primary ms-md-2" href="/painel">Ir para o painel</a></li>
+        <% } else { %>
+          <li class="nav-item"><a class="nav-link" href="/entrar">Entrar</a></li>
+          <li class="nav-item"><a class="btn btn-primary ms-md-2" href="/cadastro">Cadastre-se</a></li>
+        <% } %>
+      </ul>
+    </div>
+  </div>
+</nav>
+<main id="conteudo" class="flex-grow-1">

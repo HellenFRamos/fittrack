@@ -1,0 +1,104 @@
+<%- include('../../partials/app-topo') %>
+<%
+  const base = `${ctx.prefixo}/medidas`;
+  const leitura = ctx.somenteLeitura;
+  const cron = medidas.slice().reverse();
+  const v = (x) => (x === null || x === undefined || Number.isNaN(x)) ? '' : x;
+  const ult = medidas[0];
+%>
+<div class="ft-cabecalho">
+  <div>
+    <h1><%= ctx.rotulos.medidas %></h1>
+    <div class="sub"><%= medidas.length %> medição(ões)<%= ctx.dono.altura_cm ? ` · altura ${ctx.dono.altura_cm} cm` : '' %></div>
+    <% if (ctx.tipo === 'vinculado') { %><div class="ft-migalhas"><a href="/admin/vinculados">Usuários vinculados</a> › <a href="<%= ctx.prefixo %>"><%= ctx.dono.nome %></a> › Medidas</div><% } %>
+  </div>
+</div>
+<% if (semAltura) { %>
+  <div class="ft-aviso pessego mb-3"><i class="bi bi-info-circle me-1" aria-hidden="true"></i>
+    <%= ctx.tipo === 'proprio' ? 'Sem altura no perfil, o IMC não pode ser calculado.' : 'Altura não informada: o IMC não pode ser calculado.' %>
+    <% if (ctx.tipo === 'proprio') { %><a href="/perfil">Completar o perfil</a><% } else if (ctx.tipo === 'vinculado') { %><a href="<%= ctx.prefixo %>/editar">Informar a altura</a><% } %>
+  </div>
+<% } %>
+<% if (leitura) { %><div class="ft-aviso info mb-3"><i class="bi bi-eye me-1" aria-hidden="true"></i>Somente leitura: suas medidas são registradas pelo seu administrador.</div><% } %>
+
+<div class="row g-3">
+  <% if (!leitura) { %>
+  <div class="col-lg-4">
+    <section class="ft-card" aria-labelledby="tNova" id="nova">
+      <h2 id="tNova"><%= editando ? 'Editar medição' : 'Nova medição' %></h2>
+      <form method="post" action="<%= acao %>" novalidate>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <div class="mb-2">
+          <label class="form-label obrig" for="data_medicao">Data</label>
+          <input class="form-control <%= erros.data_medicao ? 'is-invalid' : '' %>" type="date" id="data_medicao" name="data_medicao" value="<%= medida.data_medicao %>" max="<%= d.hojeISO() %>">
+          <%- include('../../partials/erro-campo', { campo: 'data_medicao' }) %>
+        </div>
+        <div class="mb-2">
+          <label class="form-label obrig" for="peso_kg">Peso (kg)</label>
+          <input class="form-control <%= erros.peso_kg ? 'is-invalid' : '' %>" type="number" step="0.1" inputmode="decimal" id="peso_kg" name="peso_kg" value="<%= v(medida.peso_kg) %>">
+          <%- include('../../partials/erro-campo', { campo: 'peso_kg' }) %>
+        </div>
+        <div class="row g-2 mb-2">
+          <div class="col-6">
+            <label class="form-label" for="percentual_gordura">Gordura (%)</label>
+            <input class="form-control <%= erros.percentual_gordura ? 'is-invalid' : '' %>" type="number" step="0.1" inputmode="decimal" id="percentual_gordura" name="percentual_gordura" value="<%= v(medida.percentual_gordura) %>">
+            <%- include('../../partials/erro-campo', { campo: 'percentual_gordura' }) %>
+          </div>
+          <div class="col-6">
+            <label class="form-label" for="cintura_cm">Cintura (cm)</label>
+            <input class="form-control <%= erros.cintura_cm ? 'is-invalid' : '' %>" type="number" step="0.1" inputmode="decimal" id="cintura_cm" name="cintura_cm" value="<%= v(medida.cintura_cm) %>">
+            <%- include('../../partials/erro-campo', { campo: 'cintura_cm' }) %>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="observacao">Observação</label>
+          <input class="form-control" id="observacao" name="observacao" maxlength="255" value="<%= medida.observacao || '' %>" placeholder="Opcional">
+        </div>
+        <div class="d-flex gap-2">
+          <button class="btn <%= ctx.tipo === 'vinculado' ? 'btn-admin' : 'btn-primary' %>" type="submit"><%= editando ? 'Salvar alterações' : 'Salvar medição' %></button>
+          <% if (editando) { %><a class="btn btn-outline-secondary" href="<%= base %>">Cancelar</a><% } %>
+        </div>
+      </form>
+    </section>
+  </div>
+  <% } %>
+
+  <div class="<%= leitura ? 'col-12' : 'col-lg-8' %>">
+    <% if (ult) { %>
+      <div class="row g-3 mb-3">
+        <div class="col-6 col-md-3"><div class="ft-card ft-kpi h-100"><div class="rotulo">Peso</div><div class="valor num"><%= f.num(ult.peso_kg) %> <small>kg</small></div></div></div>
+        <div class="col-6 col-md-3"><div class="ft-card ft-kpi h-100"><div class="rotulo">IMC</div><div class="valor num"><%= ult.imc ? f.num(ult.imc) : '—' %></div><div class="nota text-muted"><%= ult.classificacao || 'sem altura' %></div></div></div>
+        <div class="col-6 col-md-3"><div class="ft-card ft-kpi h-100"><div class="rotulo">Gordura</div><div class="valor num"><%= ult.percentual_gordura ? f.num(ult.percentual_gordura) + '%' : '—' %></div></div></div>
+        <div class="col-6 col-md-3"><div class="ft-card ft-kpi h-100"><div class="rotulo">Cintura</div><div class="valor num"><%= ult.cintura_cm ? f.num(ult.cintura_cm) : '—' %> <small><%= ult.cintura_cm ? 'cm' : '' %></small></div></div></div>
+      </div>
+    <% } %>
+    <section class="ft-card mb-3" aria-labelledby="tEvoPeso">
+      <h2 id="tEvoPeso">Evolução do peso</h2>
+      <% if (cron.length >= 2) { %>
+        <div class="ft-grafico"><canvas role="img" aria-label="Gráfico de linha com a evolução do peso" data-grafico="<%= JSON.stringify({ tipo: 'line', rotulos: cron.map((m) => d.brCurta(m.data_medicao)), valores: cron.map((m) => Number(m.peso_kg)), sufixo: ' kg' }) %>"></canvas></div>
+        <p class="ft-valores mb-0"><span class="visually-hidden">Valores: </span><%= cron.slice(-8).map((m) => `${d.brCurta(m.data_medicao)}: ${f.num(m.peso_kg)} kg`).join(' · ') %></p>
+      <% } else { %><div class="ft-vazio py-3"><i class="bi bi-graph-up" aria-hidden="true"></i>Registre pelo menos duas medições para ver o gráfico.</div><% } %>
+    </section>
+    <section class="ft-card" aria-labelledby="tHistMed">
+      <h2 id="tHistMed">Histórico</h2>
+      <% if (medidas.length) { %>
+        <div class="table-responsive"><table class="table">
+          <thead><tr><th scope="col">Data</th><th scope="col">Peso</th><th scope="col">IMC</th><th scope="col">Gordura</th><th scope="col">Cintura</th><% if (!leitura) { %><th scope="col"><span class="visually-hidden">Ações</span></th><% } %></tr></thead>
+          <tbody>
+            <% medidas.forEach(function (m) { %>
+              <tr><td class="num"><%= d.br(m.data_medicao) %></td><td class="num fw-semibold"><%= f.num(m.peso_kg) %> kg</td>
+                <td class="num"><%= m.imc ? f.num(m.imc) : '—' %><% if (m.classificacao) { %><div class="small text-muted"><%= m.classificacao %></div><% } %></td>
+                <td class="num"><%= m.percentual_gordura ? f.num(m.percentual_gordura) + '%' : '—' %></td><td class="num"><%= m.cintura_cm ? f.num(m.cintura_cm) + ' cm' : '—' %></td>
+                <% if (!leitura) { %><td class="text-end text-nowrap">
+                  <a class="btn btn-xs btn-outline-secondary" href="<%= base %>/<%= m.id_medida %>/editar#nova" aria-label="Editar medição de <%= d.br(m.data_medicao) %>"><i class="bi bi-pencil" aria-hidden="true"></i></a>
+                  <form method="post" action="<%= base %>/<%= m.id_medida %>/excluir" class="d-inline" data-confirmar="Excluir a medição de <%= d.br(m.data_medicao) %>?"><input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button class="btn btn-xs btn-perigo" type="submit" aria-label="Excluir medição de <%= d.br(m.data_medicao) %>"><i class="bi bi-trash" aria-hidden="true"></i></button></form>
+                </td><% } %></tr>
+            <% }) %>
+          </tbody>
+        </table></div>
+      <% } else { %><div class="ft-vazio py-3"><i class="bi bi-rulers" aria-hidden="true"></i>Nenhuma medição registrada.</div><% } %>
+    </section>
+  </div>
+</div>
+<%- include('../../partials/app-rodape') %>
