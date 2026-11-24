@@ -1,4 +1,3 @@
-// UC07 – Gerenciar metas · UC08 – Registrar progresso · UC11 – Atribuir meta · UC12 – Consultar
 const metaModel = require('../models/metaModel');
 const { pertence, naoEncontrado } = require('../middlewares/contexto');
 const { numOuNulo, texto, dataValida } = require('../utils/validacao');
@@ -52,7 +51,6 @@ async function editar(req, res, next) {
   } catch (err) { return next(err); }
 }
 
-// UC07 passo 4 / A1 – alvo diferente do inicial; prazo posterior ao início e não vencido
 function lerFormulario(req, existente = null) {
   const b = req.body;
   const m = {
@@ -91,7 +89,7 @@ async function atualizar(req, res, next) {
     if (!pertence(req, atual)) return naoEncontrado(res, 'Meta');
     const { m, erros } = lerFormulario(req, atual);
     if (Object.keys(erros).length) return form(res, req, 'Editar meta', `${base(req)}/${atual.id_meta}`, { ...m, id_meta: atual.id_meta }, erros, 400);
-    const nova = await metaModel.atualizar(atual.id_meta, m); // UC07 A2 – percentual recalculado
+    const nova = await metaModel.atualizar(atual.id_meta, m);
     if (nova.status === 'CONCLUIDA' && atual.status !== 'CONCLUIDA') req.session.parabensMeta = atual.id_meta;
     req.flash('sucesso', 'Meta atualizada.');
     return res.redirect(`${base(req)}/${atual.id_meta}`);
@@ -112,7 +110,7 @@ async function registrarProgresso(req, res, next) {
     if (p.valor === null || Number.isNaN(p.valor) || Math.abs(p.valor) >= 1000000) erros.valor = erros.valor || 'Informe o valor atual.';
     if (Object.keys(erros).length) return detalhar(req, res, next, { erros, progresso: p, status: 400 });
     const nova = await metaModel.registrarProgresso(meta.id_meta, p);
-    if (nova.status === 'CONCLUIDA') req.session.parabensMeta = meta.id_meta; // UC08 A1
+    if (nova.status === 'CONCLUIDA') req.session.parabensMeta = meta.id_meta;
     else req.flash('sucesso', `Progresso registrado: ${nova.percentual}% concluído.`);
     return res.redirect(`${base(req)}/${meta.id_meta}`);
   } catch (err) { return next(err); }
@@ -128,7 +126,6 @@ async function excluirProgresso(req, res, next) {
   } catch (err) { return next(err); }
 }
 
-// UC07 A3 – cancelar (sai do painel, continua no histórico)
 async function cancelar(req, res, next) {
   try {
     const meta = await metaModel.porId(Number(req.params.id));
@@ -150,7 +147,6 @@ async function reativar(req, res, next) {
   } catch (err) { return next(err); }
 }
 
-// UC07 A4 – excluir com o histórico
 async function excluir(req, res, next) {
   try {
     const meta = await metaModel.porId(Number(req.params.id));

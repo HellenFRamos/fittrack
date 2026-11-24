@@ -1,4 +1,3 @@
-// Modelo de treinos e seus exercícios (treino + treino_exercicio).
 const db = require('../config/db');
 const { semana, addDias, hojeISO } = require('../utils/datas');
 
@@ -7,7 +6,6 @@ const SELECT = `SELECT t.*, m.nome AS modalidade, m.met, c.nome AS criador_nome,
   JOIN modalidade m ON m.id_modalidade = t.id_modalidade
   JOIN usuario c ON c.id_usuario = t.id_criador`;
 
-// RF05 – listagem com filtros por período, modalidade e situação, paginada (RNF06)
 async function listar(idUsuario, f = {}, pagina = 1, porPagina = 10) {
   const cond = ['t.id_usuario = ?'];
   const params = [idUsuario];
@@ -78,8 +76,7 @@ async function excluir(id) {
   await db.query('DELETE FROM treino WHERE id_treino = ?', [id]);
 }
 
-// ---------------------------------------------------------------- indicadores (RN05: só realizados)
-
+// Indicadores consideram só treinos realizados
 async function resumoPeriodo(idUsuario, inicio, fim) {
   return db.one(
     `SELECT COUNT(*) AS treinos, COALESCE(SUM(duracao_min), 0) AS minutos,
@@ -97,7 +94,7 @@ async function minutosPorDia(idUsuario, inicio, fim) {
   return Array.from({ length: 7 }, (_, i) => mapa[addDias(inicio, i)] || 0);
 }
 
-// Volume (minutos) por semana nas últimas N semanas (RC08)
+// Volume (minutos) por semana nas últimas N semanas
 async function volumeSemanal(idUsuario, semanas = 8) {
   const atual = semana();
   const inicio = addDias(atual.inicio, -7 * (semanas - 1));
@@ -113,7 +110,6 @@ async function volumeSemanal(idUsuario, semanas = 8) {
   return out;
 }
 
-// Frequência por modalidade nos últimos 90 dias (RC08)
 async function frequenciaModalidade(idUsuario, dias = 90) {
   return db.query(
     `SELECT m.nome AS modalidade, COUNT(*) AS treinos FROM treino t
@@ -132,8 +128,6 @@ async function planejados(idUsuario, limite = 5) {
     ORDER BY t.data_treino ASC, t.id_treino ASC LIMIT ${Number(limite)}`, [idUsuario]);
 }
 
-// Treinos que o administrador pode usar como modelo para copiar (UC11 A1):
-// os próprios e os dos seus vinculados.
 async function modelosParaCopia(adminId) {
   return db.query(
     `SELECT t.id_treino, t.titulo, t.data_treino, m.nome AS modalidade, u.nome AS dono, u.id_usuario

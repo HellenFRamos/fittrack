@@ -1,9 +1,4 @@
-// "Contexto do dono": define de quem são os treinos, metas e medidas que uma rota manipula.
-//  - próprio:    usuário pessoal ou administrador cuidando dos próprios dados;
-//  - vinculado:  administrador cuidando de um aluno seu (RN04, UC11);
-//  - atribuído:  usuário vinculado consultando em modo somente leitura (RN03, UC12).
-// Assim, os mesmos controladores e visões servem aos três casos, e a checagem de
-// permissão fica concentrada aqui e em pertence() (verificação em todas as rotas).
+// Dono dos dados da rota: próprio, vinculado ou atribuído (somente leitura).
 const usuarioModel = require('../models/usuarioModel');
 
 function ctxProprio(req, res, next) {
@@ -44,7 +39,6 @@ function ctxAtribuido(req, res, next) {
   next();
 }
 
-// Bloqueia rotas de escrita no modo somente leitura (RN03)
 function permitirEscrita(req, res, next) {
   if (req.ctx && req.ctx.somenteLeitura) {
     return res.status(403).render('pages/erros/erro', {
@@ -55,7 +49,6 @@ function permitirEscrita(req, res, next) {
   return next();
 }
 
-// O registro pertence ao dono do contexto?
 function pertence(req, registro) {
   return registro && Number(registro.id_usuario) === Number(req.ctx.dono.id_usuario);
 }

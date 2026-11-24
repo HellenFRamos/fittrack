@@ -1,4 +1,3 @@
-// Modelo de medidas corporais (medida_corporal). O IMC é calculado na aplicação.
 const db = require('../config/db');
 const { imc, classificacaoImc } = require('../utils/regras');
 const { addDias, hojeISO } = require('../utils/datas');
@@ -6,7 +5,8 @@ const { addDias, hojeISO } = require('../utils/datas');
 function comImc(m, alturaCm) {
   if (!m) return m;
   const v = imc(m.peso_kg, alturaCm);
-  return { ...m, imc: v, classificacao: classificacaoImc(v) };
+  const exato = v == null ? null : Number(m.peso_kg) / (Number(alturaCm) / 100) ** 2;
+  return { ...m, imc: v, classificacao: classificacaoImc(exato) };
 }
 
 async function listar(idUsuario, alturaCm) {
@@ -25,7 +25,6 @@ async function ultima(idUsuario) {
     [idUsuario]);
 }
 
-// Peso de referência de ~30 dias atrás, para a variação "no mês" do painel
 async function pesoReferenciaMes(idUsuario) {
   return db.one(
     `SELECT peso_kg, data_medicao FROM medida_corporal WHERE id_usuario = ? AND data_medicao <= ?

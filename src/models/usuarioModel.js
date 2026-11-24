@@ -1,4 +1,3 @@
-// Modelo de usuários (tabela usuario – herança em tabela única).
 const db = require('../config/db');
 const { semana, hojeISO, addDias } = require('../utils/datas');
 
@@ -46,14 +45,11 @@ async function atualizarSenha(id, hash, provisoria = false) {
     [hash, provisoria ? 1 : 0, id]);
 }
 
-// RF19 – exclusão definitiva (as tabelas filhas usam ON DELETE CASCADE)
+// As tabelas filhas usam ON DELETE CASCADE
 async function excluir(id) {
   await db.query('DELETE FROM usuario WHERE id_usuario = ?', [id]);
 }
 
-// ---------------------------------------------------------------- vinculados
-
-// RN04 – o administrador só enxerga os próprios vinculados
 async function vinculadoDoAdmin(adminId, vinculadoId) {
   return db.one(`SELECT ${CAMPOS} FROM usuario
     WHERE id_usuario = ? AND id_administrador = ? AND tipo_perfil = 'VINCULADO'`, [vinculadoId, adminId]);
@@ -66,12 +62,10 @@ async function atualizarVinculado(id, u) {
     [u.nome, u.email.trim().toLowerCase(), u.data_nascimento || null, u.sexo || null, u.altura_cm || null, id]);
 }
 
-// RN08 – desativação lógica
 async function definirAtivo(id, ativo) {
   await db.query('UPDATE usuario SET ativo = ? WHERE id_usuario = ?', [ativo ? 1 : 0, id]);
 }
 
-// Lista com aderência da semana: treinos realizados / treinos da semana (RF13)
 async function listarVinculados(adminId, { busca = '', situacao = 'ativos' } = {}) {
   const { inicio, fim } = semana();
   const params = [inicio, fim, inicio, fim, adminId];
@@ -96,7 +90,6 @@ async function listarVinculados(adminId, { busca = '', situacao = 'ativos' } = {
      ORDER BY u.ativo DESC, u.nome`, params);
 }
 
-// Resumo para o painel do administrador (UC05 A2)
 async function resumoVinculados(adminId) {
   const todos = await listarVinculados(adminId, { situacao: 'ativos' });
   const limite = addDias(hojeISO(), -7);

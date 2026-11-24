@@ -1,4 +1,3 @@
-// UC09 – Registrar medidas corporais (próprias ou de um vinculado) e consulta pelo vinculado (RF17)
 const medidaModel = require('../models/medidaModel');
 const { pertence, naoEncontrado } = require('../middlewares/contexto');
 const { numOuNulo, texto, dataValida } = require('../utils/validacao');
@@ -32,7 +31,6 @@ async function editar(req, res, next) {
   } catch (err) { return next(err); }
 }
 
-// UC09 passo 4 / A2 – valores impossíveis são recusados junto ao campo
 function ler(req) {
   const b = req.body;
   const m = {
@@ -60,7 +58,7 @@ async function criar(req, res, next) {
     await medidaModel.criar({ ...m, id_usuario: req.ctx.dono.id_usuario });
     req.flash('sucesso', req.ctx.dono.altura_cm
       ? 'Medição registrada. O novo peso já entra no cálculo de calorias.'
-      : 'Medição registrada sem IMC. Complete a altura no perfil para calcular o IMC.'); // UC09 A1
+      : 'Medição registrada sem IMC. Complete a altura no perfil para calcular o IMC.');
     return res.redirect(base(req));
   } catch (err) { return next(err); }
 }

@@ -1,4 +1,3 @@
-// Pool de conexões MySQL (mysql2). Todas as consultas usam parâmetros (RNF02).
 const mysql = require('mysql2/promise');
 
 const pool = mysql.createPool({
@@ -9,8 +8,8 @@ const pool = mysql.createPool({
   database: process.env.DB_NAME || 'fittrack',
   waitForConnections: true,
   connectionLimit: 10,
-  dateStrings: true,          // datas chegam como 'AAAA-MM-DD', sem conversão de fuso
-  decimalNumbers: true,       // DECIMAL chega como número
+  dateStrings: true,
+  decimalNumbers: true,
   charset: 'utf8mb4',
 });
 
@@ -24,7 +23,6 @@ async function one(sql, params = []) {
   return rows[0] || null;
 }
 
-// Executa uma função dentro de uma transação
 async function transaction(fn) {
   const conn = await pool.getConnection();
   try {

@@ -1,4 +1,3 @@
-// UC04 – Editar perfil, trocar senha (A1/A2) e excluir a própria conta (A3 / RF19)
 const bcrypt = require('bcrypt');
 const usuarioModel = require('../models/usuarioModel');
 const { errosPorCampo, numOuNulo, texto } = require('../utils/validacao');
@@ -45,7 +44,7 @@ async function trocarSenha(req, res, next) {
     const errosSenha = errosPorCampo(req);
     if (!errosSenha.senha_atual) {
       const ok = await bcrypt.compare(String(req.body.senha_atual || ''), await usuarioModel.senhaHash(req.user.id_usuario));
-      if (!ok) errosSenha.senha_atual = 'Senha atual incorreta. A senha não foi alterada.'; // A2
+      if (!ok) errosSenha.senha_atual = 'Senha atual incorreta. A senha não foi alterada.';
     }
     if (Object.keys(errosSenha).length) return tela(req, res, { errosSenha }, 400);
     await usuarioModel.atualizarSenha(req.user.id_usuario, await bcrypt.hash(req.body.nova_senha, 12), false);
@@ -54,7 +53,6 @@ async function trocarSenha(req, res, next) {
   } catch (err) { return next(err); }
 }
 
-// RF19 / LGPD – somente o usuário pessoal exclui a própria conta
 async function excluirConta(req, res, next) {
   try {
     if (req.user.tipo_perfil !== 'PESSOAL') {

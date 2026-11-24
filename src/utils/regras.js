@@ -1,7 +1,4 @@
-// Regras de negócio do FitTrack (Seção 3.4 do documento do projeto).
-
-// RN06 – percentual da meta: (atual − inicial) / (alvo − inicial) × 100, limitado a 0–100%.
-// Funciona para metas de aumento e de redução (ex.: perder peso).
+// Percentual da meta: (atual − inicial) / (alvo − inicial) × 100, limitado a 0–100%.
 function percentualMeta(inicial, alvo, atual) {
   const ini = Number(inicial);
   const alv = Number(alvo);
@@ -11,14 +8,13 @@ function percentualMeta(inicial, alvo, atual) {
   return Math.round(Math.min(100, Math.max(0, p)));
 }
 
-// RN07 – calorias estimadas = MET da modalidade × peso (kg) × duração (h).
-// Sem peso registrado, o campo fica vazio (null).
+// Calorias estimadas = MET da modalidade × peso (kg) × duração (h).
 function caloriasEstimadas(met, pesoKg, duracaoMin) {
   if (!met || !pesoKg || !duracaoMin) return null;
   return Math.round(Number(met) * Number(pesoKg) * (Number(duracaoMin) / 60));
 }
 
-// IMC = peso / altura² (altura em metros). Sem altura, não há IMC (UC09 A1).
+// IMC = peso / altura² (altura em metros).
 function imc(pesoKg, alturaCm) {
   if (!pesoKg || !alturaCm) return null;
   const m = Number(alturaCm) / 100;
@@ -35,13 +31,11 @@ function classificacaoImc(valor) {
   return 'Obesidade grau III';
 }
 
-// RN09 – mínimo de 8 caracteres, com pelo menos uma letra e um número.
 function senhaForte(senha) {
   return typeof senha === 'string' && senha.length >= 8 && /[A-Za-zÀ-ÿ]/.test(senha) && /\d/.test(senha);
 }
 const MSG_SENHA = 'A senha deve ter no mínimo 8 caracteres, com pelo menos uma letra e um número.';
 
-// RN05 – treino com data futura fica planejado.
 function statusPorData(dataISO, hojeISO) {
   return dataISO > hojeISO ? 'PLANEJADO' : 'REALIZADO';
 }

@@ -1,15 +1,12 @@
-// Modelo de metas e histórico de progresso (meta + progresso_meta).
 const db = require('../config/db');
 const { percentualMeta } = require('../utils/regras');
 const { hojeISO, diffDias } = require('../utils/datas');
 
-// Valor atual = último registro de progresso (por data); sem registros, o valor inicial.
 const SELECT = `SELECT m.*, c.nome AS criador_nome, c.tipo_perfil AS criador_perfil,
     (SELECT p.valor FROM progresso_meta p WHERE p.id_meta = m.id_meta
        ORDER BY p.data_registro DESC, p.id_progresso DESC LIMIT 1) AS ultimo_valor
   FROM meta m JOIN usuario c ON c.id_usuario = m.id_criador`;
 
-// Acrescenta campos calculados usados nas visões
 function enriquecer(m) {
   if (!m) return m;
   const atual = m.ultimo_valor ?? m.valor_inicial;
@@ -60,7 +57,7 @@ async function definirStatus(id, status) {
 }
 
 async function excluir(id) {
-  await db.query('DELETE FROM meta WHERE id_meta = ?', [id]); // progresso sai em cascata
+  await db.query('DELETE FROM meta WHERE id_meta = ?', [id]);
 }
 
 async function historico(idMeta) {
@@ -79,8 +76,6 @@ async function excluirProgresso(idMeta, idProgresso) {
   return recalcularStatus(idMeta);
 }
 
-// RN06 – ao chegar a 100% a meta passa a concluída; se voltar a ficar abaixo, volta a ativa.
-// Metas canceladas não mudam de situação automaticamente.
 async function recalcularStatus(idMeta) {
   const raw = await db.one(`${SELECT} WHERE m.id_meta = ?`, [idMeta]);
   if (!raw || raw.status === 'CANCELADA') return enriquecer(raw);

@@ -1,4 +1,3 @@
-// Monta os dados do painel de progresso de um usuário (RF11 / UC05 / RC08).
 const treinoModel = require('../models/treinoModel');
 const metaModel = require('../models/metaModel');
 const medidaModel = require('../models/medidaModel');

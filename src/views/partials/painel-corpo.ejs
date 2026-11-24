@@ -1,4 +1,4 @@
-<%# Corpo do painel: indicadores, gráfico de minutos, metas e treinos. Parâmetros: painel, pre (prefixo de links), leitura %>
+<%# Parâmetros: painel, pre, leitura %>
 <%
   const p = painel;
   const dif = p.diferencaSemanaAnterior;
@@ -25,7 +25,7 @@
     <div class="rotulo">Peso atual</div>
     <% if (p.pesoAtual) { %>
       <div class="valor num"><%= f.num(p.pesoAtual) %> <small>kg</small></div>
-      <div class="nota text-muted"><%= p.variacaoMes === null ? 'sem medição há 30 dias' : p.variacaoMes === 0 ? 'estável no mês' : `${p.variacaoMes < 0 ? '▼' : '▲'} ${f.num(Math.abs(p.variacaoMes))} kg no mês` %></div>
+      <div class="nota text-muted"><%= p.variacaoMes === null ? 'sem medição anterior para comparar' : p.variacaoMes === 0 ? 'estável no mês' : `${p.variacaoMes < 0 ? '▼' : '▲'} ${f.num(Math.abs(p.variacaoMes))} kg no mês` %></div>
     <% } else { %>
       <div class="valor">—</div>
       <div class="nota"><% if (!leitura) { %><a href="<%= pre %>/medidas">Registrar medida</a><% } else { %><span class="text-muted">sem medições</span><% } %></div>

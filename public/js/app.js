@@ -1,4 +1,3 @@
-/* FitTrack – interatividade no cliente (sem scripts inline, por causa da CSP). */
 (function () {
   'use strict';
 
@@ -7,7 +6,7 @@
   const PALETA = ['#A8D5BA', '#CFC8EE', '#F7CDB0', '#BFDCEF', '#E8D9A8', '#D7B8CF', '#B8D8D0', '#D5D9C5'];
   const fmt = (v) => Number(v).toLocaleString('pt-BR', { maximumFractionDigits: 2 });
 
-  // ---------------------------------------------------------------- gráficos (Chart.js)
+  // gráficos (Chart.js)
   function graficos() {
     if (!window.Chart) return;
     Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
@@ -28,7 +27,6 @@
       if (cfg.referencia !== undefined && cfg.tipo !== 'doughnut') {
         datasets.push({ type: 'line', label: cfg.rotuloReferencia || 'OMS', data: cfg.valores.map(() => cfg.referencia), borderColor: '#C9895F', borderDash: [6, 5], borderWidth: 1.5, pointRadius: 0, fill: false });
       }
-      // eslint-disable-next-line no-new
       new Chart(cv, {
         type: cfg.tipo,
         data: { labels: cfg.rotulos, datasets },
@@ -49,7 +47,7 @@
     });
   }
 
-  // ---------------------------------------------------------------- confirmação antes de excluir/desativar
+  // confirmação antes de excluir/desativar
   function confirmacoes() {
     const el = document.getElementById('modalConfirmar');
     if (!el || !window.bootstrap) return;
@@ -71,7 +69,7 @@
     });
   }
 
-  // ---------------------------------------------------------------- cadastro: consentimento (UC01 A3)
+  // cadastro: consentimento
   function consentimento() {
     const form = document.querySelector('form[data-consentimento]');
     if (!form) return;
@@ -82,7 +80,7 @@
     atualizar();
   }
 
-  // ---------------------------------------------------------------- formulário de treino
+  // formulário de treino
   function formTreino() {
     const form = document.getElementById('formTreino');
     if (!form) return;
@@ -95,7 +93,6 @@
     const status = form.querySelector('#status');
     const cal = form.querySelector('#calorias');
 
-    // Opções de exercício: os da modalidade escolhida primeiro, depois os demais
     function preencherOpcoes(select) {
       const mod = Number(selMod.value);
       const atual = select.value || select.dataset.valor || '';
@@ -182,7 +179,7 @@
     statusPorData();
   }
 
-  // ---------------------------------------------------------------- formulário de meta: unidade sugerida pelo tipo
+  // formulário de meta: unidade sugerida pelo tipo
   function formMeta() {
     const form = document.querySelector('form[data-unidades]');
     if (!form) return;
@@ -195,7 +192,7 @@
     });
   }
 
-  // ---------------------------------------------------------------- senha provisória
+  // senha provisória
   function gerarSenha() {
     const b = document.querySelector('[data-acao="gerar-senha"]');
     if (!b) return;

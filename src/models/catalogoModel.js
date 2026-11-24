@@ -1,4 +1,3 @@
-// Catálogo de modalidades e exercícios (RC04).
 const db = require('../config/db');
 
 async function modalidades() {

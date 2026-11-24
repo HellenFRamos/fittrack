@@ -1,6 +1,3 @@
-// Roteadores de treinos, metas e medidas. São montados em três contextos
-// (próprio, vinculado pelo administrador e somente leitura do vinculado);
-// as rotas de escrita passam por permitirEscrita (RN03).
 const express = require('express');
 const treino = require('../controllers/treinoController');
 const meta = require('../controllers/metaController');

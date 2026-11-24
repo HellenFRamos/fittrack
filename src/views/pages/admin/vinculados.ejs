@@ -63,6 +63,8 @@
                       <li><a class="dropdown-item" href="/admin/vinculados/<%= v.id_usuario %>/medidas"><i class="bi bi-rulers me-1" aria-hidden="true"></i>Medição</a></li>
                     </ul>
                   </div>
+                  <form method="post" action="/admin/vinculados/<%= v.id_usuario %>/desativar" class="d-inline" data-confirmar="Desativar o acesso de <%= v.nome %>? O histórico será preservado e você poderá reativar depois."><input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button class="ft-selo cinza border-0" type="submit">Desativar</button></form>
                 <% } else { %>
                   <form method="post" action="/admin/vinculados/<%= v.id_usuario %>/reativar" class="d-inline"><input type="hidden" name="_csrf" value="<%= csrfToken %>">
                     <button class="ft-selo lavanda border-0" type="submit">Reativar</button></form>

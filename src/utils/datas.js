@@ -1,5 +1,4 @@
-// Utilitários de data. O banco devolve datas como texto 'AAAA-MM-DD' (dateStrings),
-// e aqui trabalhamos sempre no fuso local para evitar deslocamentos de um dia.
+// Datas como texto 'AAAA-MM-DD', sempre no fuso local.
 
 const DIAS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho',
@@ -29,7 +28,7 @@ function diffDias(aISO, bISO) {
   return Math.round((parseISO(bISO) - parseISO(aISO)) / 86400000);
 }
 
-// Semana de segunda a domingo que contém a data
+// Semana de segunda a domingo
 function semana(iso = hojeISO()) {
   const d = parseISO(iso);
   const dow = (d.getDay() + 6) % 7; // 0 = segunda

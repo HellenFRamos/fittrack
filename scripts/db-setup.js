@@ -1,4 +1,3 @@
-// Cria o banco (se necessário), aplica o esquema e carrega o catálogo.
 require('dotenv').config({ quiet: true });
 const fs = require('fs');
 const path = require('path');

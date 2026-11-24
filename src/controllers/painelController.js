@@ -1,4 +1,3 @@
-// UC05 – Visualizar painel (pessoal, administrador A2 e vinculado A3/UC12)
 const painelService = require('../services/painelService');
 const usuarioModel = require('../models/usuarioModel');
 

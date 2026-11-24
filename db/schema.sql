@@ -1,7 +1,6 @@
 -- =====================================================================
 -- FitTrack – esquema físico do banco de dados (MySQL 8)
--- Implementa o modelo entidade-relacionamento da Figura 3 e as
--- restrições do dicionário de dados (Tabela 5) do documento do projeto.
+-- Implementa o modelo entidade-relacionamento
 -- =====================================================================
 
 DROP TABLE IF EXISTS sessions;
@@ -29,10 +28,10 @@ CREATE TABLE usuario (
   tipo_perfil       ENUM('PESSOAL','ADMINISTRADOR','VINCULADO') NOT NULL DEFAULT 'PESSOAL',
   id_administrador  INT NULL,
   ativo             BOOLEAN NOT NULL DEFAULT TRUE,
-  senha_provisoria  BOOLEAN NOT NULL DEFAULT FALSE,  -- RF18: obriga a troca no primeiro acesso
-  consentimento_em  DATETIME NULL,                   -- RNF03: registro do consentimento LGPD
+  senha_provisoria  BOOLEAN NOT NULL DEFAULT FALSE,
+  consentimento_em  DATETIME NULL,
   criado_em         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT uk_usuario_email UNIQUE (email),                                     -- RN01
+  CONSTRAINT uk_usuario_email UNIQUE (email),
   CONSTRAINT fk_usuario_admin FOREIGN KEY (id_administrador)
     REFERENCES usuario (id_usuario) ON DELETE RESTRICT,
   CONSTRAINT ck_usuario_vinculo CHECK ((tipo_perfil = 'VINCULADO') = (id_administrador IS NOT NULL)),

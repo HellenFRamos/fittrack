@@ -1,5 +1,3 @@
-// UC06 – Gerenciar treinos · UC11 – Atribuir treino (e copiar, A1; marcar realizado, A2)
-// UC12 – Consultar treinos atribuídos (somente leitura). Rotas montadas sob req.ctx.prefixo.
 const treinoModel = require('../models/treinoModel');
 const catalogoModel = require('../models/catalogoModel');
 const medidaModel = require('../models/medidaModel');
@@ -14,7 +12,6 @@ const MAX_ITENS = 30;
 
 function base(req) { return `${req.ctx.prefixo}/treinos`; }
 
-// ---------------------------------------------------------------- listagem (RF05)
 async function listar(req, res, next) {
   try {
     const q = req.query;
@@ -33,7 +30,6 @@ async function listar(req, res, next) {
   } catch (err) { return next(err); }
 }
 
-// ---------------------------------------------------------------- detalhes
 async function detalhar(req, res, next) {
   try {
     const t = await treinoModel.porId(Number(req.params.id));
@@ -43,7 +39,6 @@ async function detalhar(req, res, next) {
   } catch (err) { return next(err); }
 }
 
-// ---------------------------------------------------------------- formulário
 async function dadosFormulario(req) {
   const [modalidades, exercicios, ultima] = await Promise.all([
     catalogoModel.modalidades(), catalogoModel.exercicios(), medidaModel.ultima(req.ctx.dono.id_usuario),
@@ -53,12 +48,10 @@ async function dadosFormulario(req) {
 }
 
 function statusPadrao(req, data) {
-  // RF14 – treino atribuído nasce planejado; treino próprio segue a data (RN05)
   if (req.ctx.tipo === 'vinculado') return 'PLANEJADO';
   return statusPorData(data, hojeISO());
 }
 
-// Um administrador pode copiar treinos próprios ou de seus vinculados; os demais, só os próprios.
 async function podeCopiar(req, t) {
   if (!t) return false;
   if (Number(t.id_usuario) === Number(req.user.id_usuario)) return true;
@@ -100,7 +93,6 @@ async function editar(req, res, next) {
   } catch (err) { return next(err); }
 }
 
-// Lê e valida o formulário (UC06 A1: obrigatórios vazios ou valores negativos)
 async function lerFormulario(req) {
   const b = req.body;
   const erros = {};
@@ -122,7 +114,6 @@ async function lerFormulario(req) {
   } else t.duracao_min = Math.round(t.duracao_min);
   if (!INTENSIDADES.includes(t.intensidade)) erros.intensidade = 'Selecione a intensidade.';
 
-  // exercícios (RF04): um ou mais, sem valores negativos
   const brutos = Object.values(b.itens || {}).slice(0, MAX_ITENS);
   const itens = [];
   const errosItens = {};
@@ -153,11 +144,9 @@ async function lerFormulario(req) {
   }
   if (Object.keys(errosItens).length) erros.itensLinha = errosItens;
 
-  // RN05 – data futura ⇒ planejado; atribuído ⇒ planejado por padrão (RF14)
   if (!['PLANEJADO', 'REALIZADO'].includes(t.status)) t.status = statusPadrao(req, t.data_treino);
   if (t.data_treino > hojeISO()) t.status = 'PLANEJADO';
 
-  // RN07 – calorias = MET × peso mais recente × horas
   const ultima = await medidaModel.ultima(req.ctx.dono.id_usuario);
   t.calorias_estimadas = modalidade && !erros.duracao_min
     ? caloriasEstimadas(modalidade.met, ultima && ultima.peso_kg, t.duracao_min) : null;
@@ -176,7 +165,6 @@ async function criar(req, res, next) {
     if (Object.keys(erros).length) {
       return reexibir(req, res, base(req), t, itens, erros, req.ctx.tipo === 'vinculado' ? 'Atribuir treino' : 'Registrar treino');
     }
-    // UC11 passo 5 – id_usuario = dono (vinculado ou o próprio); id_criador = quem está logado
     const id = await treinoModel.criar({ ...t, id_usuario: req.ctx.dono.id_usuario, id_criador: req.user.id_usuario }, itens);
     req.flash('sucesso', t.status === 'PLANEJADO' ? 'Treino salvo como planejado.' : 'Treino registrado com sucesso!');
     return res.redirect(req.ctx.tipo === 'vinculado' ? `${req.ctx.prefixo}` : `${base(req)}/${id}`);
@@ -201,13 +189,12 @@ async function excluir(req, res, next) {
   try {
     const t = await treinoModel.porId(Number(req.params.id));
     if (!pertence(req, t)) return naoEncontrado(res, 'Treino');
-    await treinoModel.excluir(t.id_treino); // exercícios saem em cascata
+    await treinoModel.excluir(t.id_treino);
     req.flash('sucesso', 'Treino excluído.');
     return res.redirect(base(req));
   } catch (err) { return next(err); }
 }
 
-// UC11 A2 – marcar como realizado (não permitido para data futura, RN05)
 async function marcarRealizado(req, res, next) {
   try {
     const t = await treinoModel.porId(Number(req.params.id));

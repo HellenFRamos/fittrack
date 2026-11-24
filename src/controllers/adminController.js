@@ -1,4 +1,3 @@
-// UC10 – Gerenciar usuários vinculados · RF13 · RF16 – Ficha do vinculado
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const usuarioModel = require('../models/usuarioModel');
@@ -8,7 +7,6 @@ const medidaModel = require('../models/medidaModel');
 const painelService = require('../services/painelService');
 const { errosPorCampo, numOuNulo, texto } = require('../utils/validacao');
 
-// Senha provisória sugerida: atende à RN09 (letras + números, 10 caracteres)
 function sugerirSenha() {
   const letras = 'abcdefghjkmnpqrstuvwxyz';
   const nums = '23456789';
@@ -52,7 +50,7 @@ function lerDados(b) {
 async function criar(req, res, next) {
   try {
     const dados = { ...lerDados(req.body), senha_provisoria: String(req.body.senha_provisoria || '') };
-    const erros = errosPorCampo(req); // A1 – e-mail já cadastrado
+    const erros = errosPorCampo(req);
     if (Object.keys(erros).length) {
       return res.status(400).render('pages/admin/vinculado-form', { titulo: 'Cadastrar vinculado', acao: '/admin/vinculados', novo: true, erros, dados });
     }
@@ -62,7 +60,6 @@ async function criar(req, res, next) {
       id_administrador: req.user.id_usuario, senha_hash: await bcrypt.hash(dados.senha_provisoria, 12),
       senha_provisoria: true, consentimento: false,
     });
-    // UC10 passo 5 – exibe as credenciais provisórias uma única vez
     req.session.credenciais = { id, nome: dados.nome, email: dados.email, senha: dados.senha_provisoria };
     return res.redirect(`/admin/vinculados/${id}/credenciais`);
   } catch (err) { return next(err); }
@@ -75,7 +72,6 @@ function credenciais(req, res) {
   return res.render('pages/admin/credenciais', { titulo: 'Vinculado cadastrado', c });
 }
 
-// RF16 – ficha com painel, treinos, metas e medidas do vinculado
 async function ficha(req, res, next) {
   try {
     const v = req.ctx.dono;
@@ -110,7 +106,6 @@ async function atualizar(req, res, next) {
   } catch (err) { return next(err); }
 }
 
-// UC10 A2 / RN08 – desativação lógica; reativação
 async function definirAtivo(req, res, next, ativo) {
   try {
     await usuarioModel.definirAtivo(req.ctx.dono.id_usuario, ativo);
@@ -119,7 +114,6 @@ async function definirAtivo(req, res, next, ativo) {
   } catch (err) { return next(err); }
 }
 
-// Gera nova senha provisória (aluno que esqueceu a senha)
 async function redefinirSenha(req, res, next) {
   try {
     const v = req.ctx.dono;

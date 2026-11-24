@@ -1,5 +1,3 @@
-// Formatação de números e rótulos para as visões (pt-BR).
-
 function num(v, casas = 1) {
   if (v === null || v === undefined || v === '') return '—';
   return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: casas });
@@ -18,12 +16,10 @@ const ROTULOS = {
   categoria: { FORCA: 'Força', AEROBICO: 'Aeróbico', FLEXIBILIDADE: 'Flexibilidade', MISTO: 'Misto' },
 };
 
-// Unidade sugerida para cada tipo de meta
 const UNIDADE_META = {
   PESO: 'kg', FREQUENCIA: 'treinos/semana', DISTANCIA: 'km', CARGA: 'kg', TEMPO: 'min', PERSONALIZADA: '',
 };
 
-// 3 min 20 s
 function tempo(seg) {
   if (seg === null || seg === undefined || seg === '') return '';
   const s = Number(seg);
@@ -33,7 +29,6 @@ function tempo(seg) {
   return r ? `${m} min ${r} s` : `${m} min`;
 }
 
-// Resumo de um exercício: "4 × 10 · 50 kg" ou "5 km · 30 min"
 function resumoItem(it) {
   const partes = [];
   if (it.series && it.repeticoes) partes.push(`${it.series} × ${it.repeticoes}`);
@@ -49,7 +44,6 @@ function primeiroNome(nome) {
   return String(nome || '').trim().split(/\s+/)[0];
 }
 
-// "Marina A."
 function nomeCurto(nome) {
   const p = String(nome || '').trim().split(/\s+/);
   return p.length > 1 ? `${p[0]} ${p[p.length - 1][0]}.` : p[0];

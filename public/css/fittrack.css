@@ -1,8 +1,8 @@
 /* =====================================================================
-   FitTrack – identidade visual (Seção 4.6 do projeto)
-   Tons pastéis; texto sobre tons claros em verde-escuro (contraste ≥ 4,5:1).
+   FitTrack – identidade visual
+   Tons pastéis; texto sobre tons claros em verde-escuro.
    Títulos: Poppins 600–700 · Corpo: Inter 400–600 (numerais tabulares).
-   Mobile first – pontos de quebra 576 / 768 / 992 px (Seção 4.8).
+   Mobile first – pontos de quebra 576 / 768 / 992 px.
    ===================================================================== */
 
 :root {
@@ -253,3 +253,12 @@ h1, .h1 { font-weight: 700; }
 .min-w-0 { min-width: 0; }
 .dropdown-item:active { background: var(--ft-primaria-clara); color: var(--ft-verde-escuro); }
 button.ft-selo { cursor: pointer; }
+
+/* rótulos .visually-hidden (position:absolute) dentro de tabelas roláveis
+   escapavam do recorte e geravam rolagem horizontal na página em 360 px. */
+.table-responsive { position: relative; }
+
+/* No celular, campos com fonte < 16px fazem o Safari do iPhone dar zoom ao focar. */
+@media (max-width: 991.98px) {
+  .ft-item-linha .form-control, .ft-item-linha .form-select { font-size: 1rem; }
+}

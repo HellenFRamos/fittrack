@@ -1,4 +1,3 @@
-// UC02 – Visualizar página inicial e demais páginas públicas (RC09)
 function inicio(req, res) {
   res.render('pages/publico/inicio', { titulo: 'Seu progresso, em cada treino', contaExcluida: req.query.conta === 'excluida' });
 }

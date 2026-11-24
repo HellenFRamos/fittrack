@@ -1,4 +1,3 @@
-// UC01 – Criar conta pessoal · UC03 – Login/logout · RF18 – Troca de senha no primeiro acesso
 const bcrypt = require('bcrypt');
 const usuarioModel = require('../models/usuarioModel');
 const { senhaForte, MSG_SENHA } = require('../utils/regras');
@@ -13,7 +12,6 @@ function telaAcesso(res, aba, dados = {}, erros = {}, status = 200) {
 function mostrarLogin(req, res) { telaAcesso(res, 'entrar'); }
 function mostrarCadastro(req, res) { telaAcesso(res, 'cadastro'); }
 
-// Inicia a sessão regenerando o identificador (evita fixação de sessão)
 function iniciarSessao(req, usuario, manter) {
   return new Promise((resolve, reject) => {
     const voltar = req.session.voltarPara;
@@ -37,18 +35,14 @@ async function entrar(req, res, next) {
     }
     const u = await usuarioModel.porEmail(email);
     const ok = u && await bcrypt.compare(senha, u.senha_hash);
-    if (!ok) {
-      // UC03 A1 – não indicar qual dos dois está errado
-      return telaAcesso(res, 'entrar', dados, { geral: 'E-mail ou senha incorretos.' }, 401);
-    }
+    if (!ok) return telaAcesso(res, 'entrar', dados, { geral: 'E-mail ou senha incorretos.' }, 401);
     if (!u.ativo) {
-      // UC03 A2 – conta desativada (RN08)
       return telaAcesso(res, 'entrar', dados, {
         geral: 'Seu acesso foi desativado. Procure o seu administrador (personal trainer) para reativá-lo.',
       }, 403);
     }
     const voltar = await iniciarSessao(req, u, dados.manter);
-    if (u.senha_provisoria) return res.redirect('/primeiro-acesso'); // UC03 A3
+    if (u.senha_provisoria) return res.redirect('/primeiro-acesso');
     const destino = voltar && voltar.startsWith('/') && !voltar.startsWith('//') ? voltar : '/painel';
     return res.redirect(destino);
   } catch (err) {
@@ -58,13 +52,13 @@ async function entrar(req, res, next) {
 
 async function cadastrar(req, res, next) {
   try {
-    const b = req.body; // já validado e normalizado pelo usuarioValidator.cadastro
+    const b = req.body;
     const dados = {
       nome: texto(b.nome, 100), email: texto(b.email, 120).toLowerCase(),
       data_nascimento: texto(b.data_nascimento, 10), sexo: texto(b.sexo, 1),
       altura_cm: texto(b.altura_cm, 6), termos: !!b.termos, consentimento: !!b.consentimento,
     };
-    const erros = errosPorCampo(req); // UC01 A1 (e-mail em uso) e A2 (dados inválidos)
+    const erros = errosPorCampo(req);
     if (Object.keys(erros).length) return telaAcesso(res, 'cadastro', dados, erros, 400);
 
     const altura = numOuNulo(dados.altura_cm);

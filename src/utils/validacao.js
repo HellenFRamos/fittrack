@@ -1,7 +1,5 @@
-// Auxiliares de validação no servidor (RNF02 / RNF04: mensagens junto ao campo).
 const { validationResult } = require('express-validator');
 
-// Converte os erros do express-validator em { campo: mensagem }
 function errosPorCampo(req) {
   const out = {};
   for (const e of validationResult(req).array()) {
@@ -10,7 +8,6 @@ function errosPorCampo(req) {
   return out;
 }
 
-// Campo numérico opcional: '' → null; aceita vírgula decimal
 function numOuNulo(v) {
   if (v === undefined || v === null) return null;
   const s = String(v).trim().replace(',', '.');
